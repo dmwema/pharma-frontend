@@ -10,7 +10,7 @@
 		<!-- Searchable Datatable card -->
 		<a-card :bordered="false" class="header-solid mb-24" :bodyStyle="{padding: 0, paddingTop: '16px'}">
 			<template #title>
-				<h5 class="font-semibold">Tous les cours</h5>
+				<h5 class="font-semibold">Tous les cours qui vous sont attribués en G1 Informatique</h5>
 			</template>
 
 			<div class="mx-25">

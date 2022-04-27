@@ -1,0 +1,67 @@
+{
+  "name": "vue-sweetalert2",
+  "version": "5.0.2",
+  "description": "Simple Vue sweetalert2 package",
+  "main": "dist/vue-sweetalert.cjs.js",
+  "module": "dist/vue-sweetalert.es.js",
+  "browser": "dist/vue-sweetalert.umd.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "src",
+    "nuxt",
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "test:coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls",
+    "changelog": "auto-changelog git add ./CHANGELOG.md",
+    "prepublishOnly": "npm run test && npm run build && npm run changelog",
+    "lint:prettier": "prettier --write src/*.ts",
+    "lint:ts": "tsc --noEmit --skipLibCheck",
+    "lint": "npm run lint:prettier && npm run lint:ts"
+  },
+  "keywords": [
+    "sweetalert",
+    "sweetalert2",
+    "alert",
+    "prompt",
+    "ssr"
+  ],
+  "author": "Aleksey Pivkin @avil13",
+  "license": "MIT",
+  "homepage": "https://avil13.github.io/vue-sweetalert2/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avil13/vue-sweetalert2.git"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "exec": "npm run prepublish",
+    "delay": 2500
+  },
+  "dependencies": {
+    "sweetalert2": "11.x"
+  },
+  "peerDependencies": {
+    "vue": "*"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/preset-env": "^7.14.7",
+    "@vue/test-utils": "^1.2.1",
+    "auto-changelog": "^2.2.1",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^27.0.6",
+    "jest": "^27.0.6",
+    "ts-jest": "^27.0.3",
+    "typescript": "^4.3.4",
+    "vite": "^2.3.8",
+    "vue": "*",
+    "vue-jest": "^3.0.7",
+    "vue-template-compiler": "^2.6.14"
+  }
+}

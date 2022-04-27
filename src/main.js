@@ -4,8 +4,12 @@ import Vue from 'vue'
 // Ant Design Vue
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
-
 Vue.use(Antd);
+
+//sheet alert
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+Vue.use(VueSweetalert2);
 
 // Photoswipe Gallery
 import Photoswipe from 'vue-pswipe'

@@ -70,7 +70,7 @@ let routes = [{
         name: 'TeacherRatings',
         layout: "dashboard",
         meta: {
-            title: 'Gérer les cotes de la mathématique',
+            title: 'Gérer les cotes de la g1 Informatique',
             layoutClass: 'teacher-dashboard',
             sidebarMap: ['pages', 't_ratings', 'teacher-ratings'],
             breadcrumbs: ['Pages', 'Teacher', 'Ratings'],

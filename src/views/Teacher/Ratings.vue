@@ -8,9 +8,7 @@
 	<div>
         <a-tabs default-active-key="1" @change="callback">
             <a-tab-pane key="1" tab="Mathématique">
-               <a-button type="primary" icon="search" @click="showModal">
-                ENREGISTRER UNE COTE
-                </a-button>
+               <a-button type="success" @click="showModal"><a-icon type="file-excel" theme="outlined" />INPORTER VIA EXCEL</a-button>
                 <br>
                 <br>
                 <!-- Searchable Datatable card -->
@@ -49,7 +47,64 @@
         </a-tabs>
         
         <a-modal v-model="visible" title="Basic Modal" @ok="handleOk">
-            ici un formulaire
+            <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" @submit="handleSubmit">
+				<a-form-item label="Cours">
+					<a-select
+						v-decorator="[
+						'course',
+						{ rules: [{ required: true, message: 'Veuillez choisir un cours!' }] },
+						]"
+						placeholder="Selectionnez un cours ici"
+						@change="handleSelectChange"
+					>
+						<a-select-option value="mathematiques">
+						Mathématiques
+						</a-select-option>
+						<a-select-option value="info">
+						Informatique
+						</a-select-option>
+					</a-select>
+				</a-form-item>
+				<a-form-item label="Epreuve">
+					<a-select
+						v-decorator="[
+						'epreuve',
+						{ rules: [{ required: true, message: 'Veuillez choisir un cours!' }] },
+						]"
+						placeholder="Selectionnez un cours ici"
+						@change="handleSelectChange"
+					>
+						<a-select-option value="mathematiques">
+						Interro
+						</a-select-option>
+						<a-select-option value="info">
+						Examen
+						</a-select-option>
+					</a-select>
+				</a-form-item>
+
+				<a-upload-dragger
+					name="file"
+					:multiple="false"
+					action="google.com"
+					@change="handleChange"
+				>
+					<p class="ant-upload-drag-icon">
+					<a-icon type="inbox" />
+					</p>
+					<p class="ant-upload-text">
+					Cliquez ou glissez et deposez un fichier ici
+					</p>
+					<p class="ant-upload-hint">
+					Support for a single or bulk upload. Strictly prohibit from uploading company data or other
+					band files
+					</p>
+				</a-upload-dragger>
+	
+				<a-form-item :wrapper-col="{ span: 12, offset: 5 }">
+				
+				</a-form-item>
+			</a-form>
         </a-modal>
 		
 	</div>
@@ -117,6 +172,13 @@
 				// Second table's search query.
 				query: '',
 
+				//modal visibility
+      			visible: false,
+				
+				formLayout: 'horizontal',
+      			
+				form: this.$form.createForm(this, { name: 'coordinated' }),
+
 			}
 		},
 		methods: {
@@ -149,7 +211,46 @@
 					this.data2 = data2 ;
 				}
 			},
+			showModal() {
+				this.visible = true;
+			},
+			handleOk(e) {
+				console.log(e);
+				this.visible = false;
+			},
 			
+			handleChange(info) {
+				const status = info.file.status;
+				if (status !== 'uploading') {
+					console.log(info.file, info.fileList);
+				}
+				if (status === 'done') {
+					this.$message.success(`${info.file.name} file uploaded successfully.`);
+				} else if (status === 'error') {
+					this.$message.error(`${info.file.name} file upload failed.`);
+				}
+			},
+			
+			callback(key) {
+				console.log(key);
+			},
+
+			handleSubmit(e) {
+				e.preventDefault();
+				this.form.validateFields((err, values) => {
+					if (!err) {
+					console.log('Received values of form: ', values);
+					}
+				});
+			},
+			
+			handleSelectChange(value) {
+				console.log(value);
+				this.form.setFieldsValue({
+					note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`,
+				});
+			},
+						
 		},
 	}
 
