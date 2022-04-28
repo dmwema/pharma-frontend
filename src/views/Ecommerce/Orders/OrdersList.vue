@@ -317,7 +317,6 @@
 				
 				// Table's selected rows
       			selectedRowKeys: [],
-
 			}
 		},
 		computed: {

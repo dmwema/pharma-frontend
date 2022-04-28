@@ -15,6 +15,18 @@ let routes = [{
         redirect: '/dashboards/',
     },
     {
+        path: '/deliberation',
+        name: 'Deliberation',
+        layout: "dashboard",
+        meta: {
+            title: 'délibération de l\'année academique 2020-2021',
+            sidebarMap: ['dashboards'],
+            breadcrumbs: ['Dashboards', 'Deliberation'],
+        },
+        component: () =>
+            import ('../views/Teacher/Deliberation.vue'),
+    },
+    {
         path: '/dashboards/',
         name: 'DashboardsCRM',
         layout: "dashboard",

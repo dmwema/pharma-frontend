@@ -8,14 +8,23 @@
 	<div>
         <a-tabs default-active-key="1" @change="callback">
             <a-tab-pane key="1" tab="Mathématique">
-               <a-button type="success" @click="showModal"><a-icon type="file-excel" theme="outlined" />INPORTER VIA EXCEL</a-button>
-                <br>
-                <br>
                 <!-- Searchable Datatable card -->
                 <a-card :bordered="false" class="header-solid mb-24" :bodyStyle="{padding: 0, paddingTop: '16px'}">
                     <template #title>
                         <h5 class="font-semibold">Première Intérrogation / <small>20 Juillet 20222</small></h5>
-                    </template>
+						
+						<!-- Test List header -->
+						<a-row type="flex" :gutter="24">
+							<a-col :span="12">
+		               			<a-button type="success" @click="showModal"><a-icon type="file-excel" theme="outlined" />IMPORTER VIA EXCEL</a-button>
+							</a-col>
+							<a-col :span="12" class="mb-24 text-right">
+							<a-button @click="csvExport(csvData)" class="ml-15">
+								<i class="ni ni-archive-2 mr-5"></i> EXPORTER EN .XLS
+							</a-button>
+						</a-col>
+						</a-row>
+					</template>
                     <div class="mx-25">
                         <a-row type="flex" :gutter="24">
                             <a-col :span="24" :md="12">
@@ -29,12 +38,16 @@
                                 <label for="" class="ml-10">entries per page</label>
                             </a-col>
                             <a-col :span="24" :md="12" class="text-right">
-                                <a-input-search placeholder="input search text" style="max-width: 200px;" v-model="query" @change="onSearchChange" />
+                                <a-input-search placeholder="input search text" style="max-width: 200px;" v-model="query" @change="onSearchChange"/>
                             </a-col>
                         </a-row>
                     </div>
                     
-                    <a-table class="mt-20" :columns="columns2" :data-source="data2" :pagination="{pageSize: pageSize2,}" />
+                    <a-table class="mt-20" :columns="columns2" :data-source="data2" :pagination="{pageSize: pageSize2,}">
+						<template slot="cote" slot-scope="cote">
+							<a-input placeholder="0" min="0" max="20" type="number" :value="cote" style="width:42px"/>	
+						</template>	
+					</a-table>
                 </a-card>
                 <!-- / Searchable Datatable card -->
             </a-tab-pane>
@@ -47,14 +60,14 @@
         </a-tabs>
         
         <a-modal v-model="visible" title="Basic Modal" @ok="handleOk">
-            <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }" @submit="handleSubmit">
-				<a-form-item label="Cours">
+            <a-form :form="form" @submit="handleSubmit">
+				<a-form-item label="Epreuve">
 					<a-select
 						v-decorator="[
 						'course',
-						{ rules: [{ required: true, message: 'Veuillez choisir un cours!' }] },
+						{ rules: [{ required: true, message: 'Veuillez choisir une épreuve!' }] },
 						]"
-						placeholder="Selectionnez un cours ici"
+						placeholder="Selectionnez une épreuve ici"
 						@change="handleSelectChange"
 					>
 						<a-select-option value="mathematiques">
@@ -65,24 +78,6 @@
 						</a-select-option>
 					</a-select>
 				</a-form-item>
-				<a-form-item label="Epreuve">
-					<a-select
-						v-decorator="[
-						'epreuve',
-						{ rules: [{ required: true, message: 'Veuillez choisir un cours!' }] },
-						]"
-						placeholder="Selectionnez un cours ici"
-						@change="handleSelectChange"
-					>
-						<a-select-option value="mathematiques">
-						Interro
-						</a-select-option>
-						<a-select-option value="info">
-						Examen
-						</a-select-option>
-					</a-select>
-				</a-form-item>
-
 				<a-upload-dragger
 					name="file"
 					:multiple="false"
@@ -132,6 +127,7 @@
 			dataIndex: 'ponderation',
 			sortDirections: ['descend', 'ascend'],
 			sorter: (a, b) => a.ponderation - b.ponderation,
+			scopedSlots: { customRender: 'cote' },
 		}
 	];
 	
@@ -257,4 +253,15 @@
 </script>
 
 <style lang="scss">
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+	}
+
+	/* Firefox */
+	input[type=number] {
+	-moz-appearance: textfield;
+	}
 </style>
