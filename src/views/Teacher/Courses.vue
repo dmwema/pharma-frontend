@@ -40,6 +40,8 @@
 </template>
 
 <script>
+	
+	import axios from 'axios';
 
 	// Second table's list of columns.
 	const columns2 = [
@@ -51,8 +53,8 @@
 		},
 		{
 			title: 'ITITULÉ',
-			dataIndex: 'name',
-			sorter: (a, b) => a.name.length - b.name.length,
+			dataIndex: 'title',
+			sorter: (a, b) => a.title.length - b.title.length,
 			sortDirections: ['descend', 'ascend'],
 		},
 		{
@@ -65,18 +67,6 @@
 	
 	// Second table's list of rows.
 	const data2 = [
-		{
-			key: 1,
-			id: 1,
-			name: "Mathématiques",
-			ponderation: 4,
-		},
-		{
-			key: 2,
-			id: 2,
-			name: "Informatique",
-			ponderation: 6,
-		}
 	] ;
 
 	export default {
@@ -133,6 +123,11 @@
 				}
 			},
 			
+		},
+		mounted() {
+			axios
+				.get('http://localhost:8080/teacher/courses/11')
+				.then(response => (this.data2 = response.data))
 		},
 	}
 

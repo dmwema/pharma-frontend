@@ -19,10 +19,6 @@
 			</a-layout-content>
 			<!-- / Page Content -->
 
-			<!-- Layout Footer -->
-			<DefaultFooter v-if="! $route.meta.nofooter"></DefaultFooter>
-			<!-- / Layout Footer -->
-
 		</a-layout>
 		<!-- / Default Layout -->
 

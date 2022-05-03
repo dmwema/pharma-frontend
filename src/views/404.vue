@@ -4,9 +4,9 @@
  -->
 
 <template>
-	<a-result status="404" title="404" sub-title="Sorry, the page you visited does not exist.">
+	<a-result status="404" title="404" sub-title="Desolé, la page que vous voullez charger n'existe pas ou a été supprimée">
 		<template #extra>
-			<router-link class="ant-btn ant-btn-primary" to="/">Back Home</router-link>
+			<router-link class="ant-btn ant-btn-primary" to="/">Retour en arrière</router-link>
 		</template>
 	</a-result>
 </template>

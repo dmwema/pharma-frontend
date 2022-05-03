@@ -6,38 +6,115 @@ Vue.use(VueRouter)
 let routes = [{
         // will match everything
         path: '*',
+        layout: "default",
         component: () =>
             import ('../views/404.vue'),
     },
     {
         path: '/',
         name: 'Home',
-        redirect: '/dashboards/',
+        redirect: '/t/dashboards/',
     },
     {
-        path: '/deliberation',
-        name: 'Deliberation',
-        layout: "dashboard",
+        path: '/t/dashboards/',
+        name: 'DashboardsTeacher',
+        layout: "teacher",
+        meta: {
+            title: 'Tableau de bord',
+            sidebarMap: ['dashboards'],
+            breadcrumbs: ['Dashboards', 'Teacher'],
+        },
+        component: () =>
+            import ('../views/Dashboards/Teacher.vue'),
+    },
+    {
+        path: '/t/deliberation',
+        name: 'DeliberationTeacher',
+        layout: "teacher",
         meta: {
             title: 'délibération de l\'année academique 2020-2021',
-            sidebarMap: ['dashboards'],
+            sidebarMap: ['deliberation'],
             breadcrumbs: ['Dashboards', 'Deliberation'],
         },
         component: () =>
             import ('../views/Teacher/Deliberation.vue'),
     },
     {
-        path: '/dashboards/',
-        name: 'DashboardsCRM',
-        layout: "dashboard",
+        path: '/t/courses',
+        name: 'TeacherCourses',
+        layout: "teacher",
+        meta: {
+            title: 'Tous vos cours',
+            layoutClass: 'teacher-dashboard',
+            sidebarMap: ['courses'],
+            breadcrumbs: ['Pages', 'Teacher', 'Courses'],
+        },
+        component: () =>
+            import ('../views/Teacher/Courses.vue'),
+    },
+    {
+        path: '/t/epreuves',
+        name: 'TeacherTestes',
+        layout: "teacher",
+        meta: {
+            title: 'Toutes les épreuves',
+            layoutClass: 'teacher-dashboard',
+            sidebarMap: ['tests'],
+            breadcrumbs: ['Pages', 'Teacher', 'Tests'],
+        },
+        component: () =>
+            import ('../views/Teacher/Tests.vue'),
+    },
+    {
+        path: '/t/ratings',
+        name: 'TeacherRatings',
+        layout: "teacher",
+        meta: {
+            title: 'Gérer les cotes de la g1 Informatique',
+            layoutClass: 'teacher-dashboard',
+            sidebarMap: ['ratings'],
+            breadcrumbs: ['Pages', 'Teacher', 'Ratings'],
+        },
+        component: () =>
+            import ('../views/Teacher/Ratings.vue'),
+    },
+    {
+        path: '/f/dashboards/',
+        name: 'DashboardsFac',
+        layout: "fac",
         meta: {
             title: 'Tableau de bord',
             sidebarMap: ['dashboards'],
-            breadcrumbs: ['Dashboards', 'CRM'],
+            breadcrumbs: ['Dashboards'],
         },
         component: () =>
-            import ('../views/Dashboards/CRM.vue'),
+            import ('../views/Dashboards/Fac.vue'),
     },
+    {
+        path: '/f/teachers/',
+        name: 'DashboardsFacTeachers',
+        layout: "fac",
+        meta: {
+            title: 'Tous les professeurs',
+            sidebarMap: ['teachers'],
+            breadcrumbs: ['Dashboards', 'Teachers'],
+        },
+        component: () =>
+            import ('../views/Fac/Teachers.vue'),
+    },
+    {
+        path: '/f/courses/',
+        name: 'DashboardsFacCourses',
+        layout: "fac",
+        meta: {
+            title: 'Tous les cours de la G1',
+            sidebarMap: ['teachers'],
+            breadcrumbs: ['Dashboards', 'courses'],
+        },
+        component: () =>
+            import ('../views/Fac/Courses.vue'),
+    },
+
     {
         path: '/pages/profile/profile-overview',
         name: 'ProfileOverview',
@@ -50,45 +127,6 @@ let routes = [{
         },
         component: () =>
             import ('../views/Profile/ProfileOverview.vue'),
-    },
-    {
-        path: '/t/courses',
-        name: 'TeacherCourses',
-        layout: "dashboard",
-        meta: {
-            title: 'Tous vos cours',
-            layoutClass: 'teacher-dashboard',
-            sidebarMap: ['pages', 't_courses', 'teacher-courses'],
-            breadcrumbs: ['Pages', 'Teacher', 'Courses'],
-        },
-        component: () =>
-            import ('../views/Teacher/Courses.vue'),
-    },
-    {
-        path: '/t/epreuves',
-        name: 'TeacherTestes',
-        layout: "dashboard",
-        meta: {
-            title: 'Toutes les épreuves',
-            layoutClass: 'teacher-dashboard',
-            sidebarMap: ['pages', 't_tests', 'teacher-tests'],
-            breadcrumbs: ['Pages', 'Teacher', 'Tests'],
-        },
-        component: () =>
-            import ('../views/Teacher/Tests.vue'),
-    },
-    {
-        path: '/t/c/mathematiques',
-        name: 'TeacherRatings',
-        layout: "dashboard",
-        meta: {
-            title: 'Gérer les cotes de la g1 Informatique',
-            layoutClass: 'teacher-dashboard',
-            sidebarMap: ['pages', 't_ratings', 'teacher-ratings'],
-            breadcrumbs: ['Pages', 'Teacher', 'Ratings'],
-        },
-        component: () =>
-            import ('../views/Teacher/Ratings.vue'),
     },
     {
         path: '/pages/profile/all-projects',
@@ -335,8 +373,9 @@ let routes = [{
             import ('../views/Ecommerce/Orders/OrdersDetails.vue'),
     },
     {
-        path: '/sign-up',
+        path: '/t/sign-up/:link',
         name: 'Illustration Sign Up',
+        layout: "default",
         meta: {
             layoutClass: 'layout-sign-up-illustration',
             title: 'Illustration Sign Up',
@@ -348,8 +387,9 @@ let routes = [{
             import ('../views/Authentication/Sign-Up/Illustration.vue'),
     },
     {
-        path: '/sign-up/edit-credentials',
-        name: 'Edit credentials',
+        path: '/edit-credentials',
+        name: 'Editcredentials',
+        layout: "default",
         meta: {
             layoutClass: 'layout-sign-up-illustration',
             title: 'Edit Credentials',
@@ -371,7 +411,7 @@ let routes = [{
 
 // Adding layout property from each route to the meta
 // object so it can be accessed later.
-function addLayoutToRoute(route, parentLayout = "default") {
+function addLayoutToRoute(route, parentLayout = "teacher") {
     route.meta = route.meta || {};
     route.meta.layout = route.layout || parentLayout;
 
