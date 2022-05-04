@@ -387,6 +387,20 @@ let routes = [{
             import ('../views/Authentication/Sign-Up/Illustration.vue'),
     },
     {
+        path: '/t/login',
+        name: 'Illustration Login',
+        layout: "default",
+        meta: {
+            layoutClass: 'layout-login-illustration',
+            title: 'Illustration Login',
+            sidebarMap: ['authentication', 'Login', 'illustration'],
+            breadcrumbs: ['Authentication', 'Login', 'Illustration'],
+            nofooter: true,
+        },
+        component: () =>
+            import ('../views/Authentication/Sign-Up/Login.vue'),
+    },
+    {
         path: '/edit-credentials',
         name: 'Editcredentials',
         layout: "default",

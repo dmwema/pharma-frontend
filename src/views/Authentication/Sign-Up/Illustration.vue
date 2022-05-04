@@ -1,7 +1,6 @@
 
 <template>
 	<div class="sign-in">
-		
 		<a-row type="flex" :gutter="[24,24]" justify="space-around" align="middle" class="row-main">
 
 			<!-- Sign Up Form Column -->
@@ -53,6 +52,14 @@
 					type="error"
 					closable
 					:after-close="handleClose"
+					style="margin-bottom:40px"
+				/>
+				<a-alert
+					v-if="visible2"
+					message="Un mail a été envoyé à l'adresse renseigné. Veuillez consulter votre boite"
+					type="success"
+					closable
+					:after-close="handleClose2"
 					style="margin-bottom:40px"
 				/>
 				<h4 class="mb-15">Modifiez vos information de connexion</h4>
@@ -135,6 +142,7 @@
 				cred_form: this.$form.createForm(this, { name: 'cred_illustration' }),
 				prof_names: '',
 				visible: false,
+				visible2: false,
 				isloginpage: true, 
 				passShown: false,
 				passType: 'password',
@@ -173,8 +181,9 @@
 					if (values.password !== values.password_c) {
 						this.has_valid_error = true
 						this.valid_message = "Les deux mots de passes ne correspondent pas"
+						return null;
 					} else {
-						has_valid_error = false
+						this.has_valid_error = false
 					}
 					if ( !err ) {
 						axios({
@@ -187,6 +196,9 @@
 							}
 						})
 						.then((response) => {
+							if (response.data.saved) {
+								this.visible2 = true
+							}
 							console.log(response.data)
 						}).catch(err => console.log(err))
 					}
@@ -194,6 +206,9 @@
 			},
 			handleClose() {
 				this.visible = false;
+			},
+			handleClose2() {
+				this.visible2 = false;
 			},
 			showPass() {
 				if (!this.passShown) {
@@ -206,6 +221,7 @@
 			}
 		},
 		beforeMount() {
+			this.$eventHub.$emit('clsLoader');
 			axios({
 				method: 'post',
 				url: 'http://localhost:8080/checklink',

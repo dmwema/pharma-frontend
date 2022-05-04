@@ -40,6 +40,10 @@ import './scss/app.scss';
 
 Vue.config.productionTip = false
 
+//event bus
+Vue.prototype.$eventHub = new Vue(); // Global event bus
+
+
 // Initialize Vue
 new Vue({
     router,

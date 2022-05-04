@@ -7,11 +7,11 @@
 
 	<div>
         <a-tabs default-active-key="1" @change="callback">
-            <a-tab-pane key="1" tab="Mathématique">
+            <a-tab-pane v-for="course in courses" :key="course.id" :tab="course.title + ' (' + course.annual_works.length + ')'">
 				<!-- Test List header -->
 				<a-row type="flex" :gutter="24">
 					<a-col :span="12" class="mb-24">
-               			<a-button @click="showModal"><a-icon type="plus-circle" theme="outlined" />ENREGISTRER UNE EPREUVE</a-button>
+               			<a-button @click="create_test(course.id)"><a-icon type="plus-circle" theme="outlined"/>ENREGISTRER UNE EPREUVE</a-button>
 					</a-col>
 				</a-row>
 				<!-- / Test List header -->
@@ -31,14 +31,14 @@
 					<!-- Test table -->
 					<a-table class="mt-20"
 						:columns="columns"
-						:data-source="data"
+						:data-source="course.annual_works"
 						:pagination="{pageSize: pageSize,}"
 					>
 
-						<template slot="id" slot-scope="id">#{{ id }}</template>
+						<template slot="date_work" slot-scope="date_work">{{ moment(date_work).format("D MMM YYYY") }}</template>
 
-						<template slot="actions">
-							<a-button @click="deleteRow" icon="delete" type="danger" class="btn-status border-danger mr-5">
+						<template slot="actions" slot-scope="id">
+							<a-button @click="deleteRow(id)" icon="delete" type="danger" class="btn-status border-danger mr-5">
 								Suppr.
 							</a-button>	
 							<a-button @click="showEditModal" icon="edit" type="primary" class="btn-status border-primary mr-5">
@@ -52,38 +52,33 @@
 				</a-card>
 				<!-- / Test List card -->
             </a-tab-pane>
-            <a-tab-pane key="2" tab="Informatique" force-render>
-            </a-tab-pane>
-            <a-tab-pane key="3" tab="Bilogie Animale">
-            </a-tab-pane>
         </a-tabs>
         
         <a-modal v-model="visible" title="Enrégistrer une épreuve" @ok="handleOk">
-            <a-form :form="form" @submit="handleSubmit">
+            <a-form :form="form">
+
 				<a-form-item class="mb-10" label="Date" :colon="false">
-					<a-input type="date" placeholder="Basic usage" />
+					<a-input v-decorator="[
+							'date',
+							{ rules: [{ required: true, message: 'Vous devez entrer une date' }] },
+					]"
+					type="date" placeholder="Date de l'épreuve" />
 				</a-form-item>
 
 				<a-form-item class="mb-10" label="Donnez un titre à l'épreuve" :colon="false">
-					<a-input placeholder="Intitulé" />
+					<a-input v-decorator="[
+							'title',
+							{ rules: [{ required: true, message: 'Vous devez entrer un intitulé' }] },
+					]" 
+					placeholder="Intitulé" />
 				</a-form-item>
 
-				<a-form-item label="Type d'épreuve">
-					<a-select
-						v-decorator="[
-							'type',
-							{ rules: [{ required: true, message: 'Please select your gender!' }] },
-						]"
-						placeholder="Selectionnez une épreuve parmis celles enrégistrées"
-						@change="handleSelectChange"
-					>
-						<a-select-option value="male">
-						Examen
-						</a-select-option>
-						<a-select-option value="female">
-						Autre
-						</a-select-option>
-					</a-select>
+				<a-form-item class="mb-10" label="Donnez une description de l'épreuve" :colon="false">
+					<a-input v-decorator="[
+						'description',
+						{ rules: [{ required: true, message: 'Vous devez entrer une description' }] },
+					]" 
+					placeholder="Description" />
 				</a-form-item>
 					
 			</a-form>
@@ -94,34 +89,38 @@
 </template>
 
 <script>
+	import axios from 'axios';
+	let momentjs = require('moment');
 
 	// Table columns
 	const columns = [
 		{
 			title: 'ID',
-			dataIndex: 'key',
-			sorter: (a, b) => a.key - b.key,
+			dataIndex: 'id',
+			sorter: (a, b) => a.id - b.id,
 			sortDirections: ['descend', 'ascend'],
 			scopedSlots: { customRender: 'id' },
 		},
 		{
 			title: 'DATE',
-			dataIndex: 'date',
-			sorter: (a, b) => a.date.length - b.date.length,
+			dataIndex: 'date_work',
+			sorter: (a, b) => a.date_work - b.date_work,
 			sortDirections: ['descend', 'ascend'],
-		},
-		{
-			title: 'TYPE',
-			dataIndex: 'type',
-			sorter: (a, b) => stringSorter(a, b, 'type'),
-			sortDirections: ['descend', 'ascend'],
+			scopedSlots: { customRender: 'date_work' },
 		},
 		{
 			title: 'INTITULÉ',
-			dataIndex: 'name',
-			sorter: (a, b) => parseFloat(a.revenue) - parseFloat(b.revenue),
+			dataIndex: 'title',
+			sorter: (a, b) => a.title.length - b.title.length,
 			sortDirections: ['descend', 'ascend'],
-			scopedSlots: { customRender: 'name' },
+			scopedSlots: { customRender: 'title' },
+		},
+		{
+			title: 'DESCRIPTION',
+			dataIndex: 'description',
+			sorter: (a, b) => a.description.length - b.description.length,
+			sortDirections: ['descend', 'ascend'],
+			scopedSlots: { customRender: 'description' },
 		},
 		{
 			title: '',
@@ -268,6 +267,10 @@
 		},
 		data() {
 			return {
+
+				current_course: null,
+
+				moment: momentjs,
 				
 				// Table columns
 				columns,
@@ -294,10 +297,13 @@
 				// Table's selected rows
       			selectedRowKeys: [],
 
+				courses: [],
+
 			}
 		},
 		methods: {
-			deleteRow() {
+			deleteRow(id) {
+				console.log(id)
 				this.$swal.fire({
 					title: "Êtes-vous sûre ?",
 					text: "Une fois supprimée, vous n'allez plus récuperer cette information",
@@ -308,9 +314,30 @@
   					focusConfirm: false,
 					dangerMode: true,
 				}).then((result) => {
-				if (result.isConfirmed) {
-					console.log('canceled')
-				} else if (result.isDenied) {
+				if (result.isDenied) {
+					axios({
+							method: 'delete',
+							url: 'http://localhost:8080/teacher/work',
+							data: {
+								title: values.title,
+								description: values.description,
+								date: values.date,
+								course_id: this.current_course,
+							}
+						})
+						.then((response) => {
+							if (response.data.success) {
+								Toast.fire({
+								icon: 'success',
+								title: response.data.message
+							})
+							} else {
+								Toast.fire({
+									icon: 'success',
+									title: response.data.message
+								})
+							}
+						}).catch(err => console.log(err))
 					const Toast = this.$swal.mixin({
 						toast: true,
 						position: 'top-end',
@@ -354,23 +381,6 @@
 				this.selectedRowKeys = selectedRowKeys;
 			},
 
-			// Export table in CSV format.
-			csvExport(arrData) {
-				let csvContent = "data:text/csv;charset=utf-8,";
-				csvContent += [
-					Object.keys(arrData[0]).join("|"),
-					...arrData.map(item => Object.values(item).join("|"))
-				]
-					.join("\n")
-					.replace(/(^\[)|(\]$)/gm, "");
-
-				const data = encodeURI(csvContent);
-				const link = document.createElement("a");
-				link.setAttribute("href", data);
-				link.setAttribute("download", "muse-dashboard-csv.csv");
-				link.click();
-			},
-
 			// Event handler for first table's size change.
 			onPageSizeChange() {
 				this.pageSize = parseInt( this.pageSize ) ;
@@ -385,10 +395,16 @@
 				this.visible = true;
 			},
 
+			handleSelectChange() {
+				console.log('changed')
+			},
+
 			showEditModal() {
 				this.visible = true;
 			},
 			handleOk(e) {
+				e.preventDefault();
+				
 				this.visible = false;
 
 				const Toast = this.$swal.mixin({
@@ -398,15 +414,38 @@
 					timer: 2000,
 					timerProgressBar: false,
 					didOpen: (toast) => {
-						toast.addEventListener('mouseenter', Swal.stopTimer)
-						toast.addEventListener('mouseleave', Swal.resumeTimer)
+						toast.addEventListener('mouseenter', this.$swal.stopTimer)
+						toast.addEventListener('mouseleave', this.$swal.resumeTimer)
 					}
 				})
 
-				Toast.fire({
-					icon: 'success',
-					title: 'Épreue enrégistrée avec succès'
-				})
+				this.form.validateFields((err, values) => {
+					if ( !err ) {
+						axios({
+							method: 'post',
+							url: 'http://localhost:8080/teacher/work',
+							data: {
+								title: values.title,
+								description: values.description,
+								date: values.date,
+								course_id: this.current_course,
+							}
+						})
+						.then((response) => {
+							if (response.data.success) {
+								Toast.fire({
+								icon: 'success',
+								title: response.data.message
+							})
+							} else {
+								Toast.fire({
+									icon: 'success',
+									title: response.data.message
+								})
+							}
+						}).catch(err => console.log(err))
+					}
+				});
 			},
 			
 			handleChange(info) {
@@ -425,22 +464,19 @@
 				console.log(key);
 			},
 
-			handleSubmit(e) {
-				e.preventDefault();
-				this.form.validateFields((err, values) => {
-					if (!err) {
-					console.log('Received values of form: ', values);
-					}
-				});
-			},
-			
-			handleSelectChange(value) {
-				console.log(value);
-				this.form.setFieldsValue({
-					note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`,
-				});
-			},
+			create_test(id) {
+				this.current_course = id
+				this.showModal();
+			}
 						
+		},
+		mounted() {
+			axios
+				.get('http://localhost:8080/teacher/works/11')
+				.then((response) => {
+					this.courses = response.data
+				})
+				.catch(err => console.log(err))
 		},
 	}
 </script>
