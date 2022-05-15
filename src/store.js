@@ -23,6 +23,15 @@ const mutations = {
     }
 }
 
+const actions = {
+    addProf: (store, prof) => {
+        store.commit('ADD_PROF', prof)
+    },
+    deleteProf: (store, prof) => {
+
+    }
+}
+
 const getters = {
     profs: state => state.fac.professors
 }
@@ -31,7 +40,7 @@ let store = new Vuex.Store({
     state: state,
     mutations: mutations,
     getters: getters,
-    actions: {},
+    actions: actions,
     strict: true
 })
 

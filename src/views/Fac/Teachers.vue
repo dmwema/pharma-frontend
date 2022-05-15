@@ -29,7 +29,7 @@
 					<!-- Test table -->
 					<a-table class="mt-20"
 						:columns="columns"
-						:data-source="profs"
+						:data-source="data"
 						:pagination="{pageSize: pageSize,}"
 					>
 
@@ -51,21 +51,37 @@
 				<!-- / Test List card -->
         
         <a-modal v-model="visible" title="Enrégistrer un professeur" @ok="handleOk">
-            <a-form :form="form" @submit="handleSubmit" class="row">
+            <a-form :form="form" class="row">
 				<a-form-item class="mb-10 col-md-6" label="Nom" :colon="false">
-					<a-input type="text" placeholder="Nom du professeur" />
+					<a-input 
+						v-decorator="[
+							'lastname',
+							{ rules: [{ required: true, message: 'Ce champ est réquis' }] },
+						]" type="text" placeholder="Nom du professeur" />
 				</a-form-item>
 
 				<a-form-item class="mb-10" label="Postnom" :colon="false">
-					<a-input type="text" placeholder="Postnom du professeur" />
+					<a-input 
+						v-decorator="[
+							'middlename',
+							{ rules: [{ required: true, message: 'Ce champ est requis' }] },
+						]" type="text" placeholder="Postnom du professeur" />
 				</a-form-item>
 
 				<a-form-item class="mb-10" label="Prenom" :colon="false">
-					<a-input type="text" placeholder="Prenom du professeur" />
+					<a-input 
+						v-decorator="[
+							'firstname',
+							{ rules: [{ required: true, message: 'Veuillez entre l\'adresse email!' }] },
+						]" type="text" placeholder="Prenom du professeur" />
 				</a-form-item>
 
 				<a-form-item class="mb-10" label="Email" :colon="false">
-					<a-input placeholder="Adresse email du professeur" />
+					<a-input 
+						v-decorator="[
+							'email',
+							{ rules: [{ required: true, message: 'Veuillez entrer une adresse email!' }] },
+						]" placeholder="Adresse email du professeur" />
 				</a-form-item>
 
 				<a-form-item label="Sexe">
@@ -170,6 +186,10 @@
 			}
 		},
 		methods: {
+			...Vuex.mapActions({
+					addProfStore: 'addProf'
+			}),
+
 			deleteRow() {
 				this.$swal.fire({
 					title: "Êtes-vous sûre ?",
@@ -245,7 +265,7 @@
 				this.visible = true;
 			},
 			handleOk(e) {
-				this.visible = false;
+				e.preventDefault();
 
 				const Toast = this.$swal.mixin({
 					toast: true,
@@ -254,15 +274,48 @@
 					timer: 2000,
 					timerProgressBar: false,
 					didOpen: (toast) => {
-						toast.addEventListener('mouseenter', Swal.stopTimer)
-						toast.addEventListener('mouseleave', Swal.resumeTimer)
+						toast.addEventListener('mouseenter', this.$swal.stopTimer)
+						toast.addEventListener('mouseleave', this.$swal.resumeTimer)
 					}
 				})
 
-				Toast.fire({
-					icon: 'success',
-					title: 'Épreue enrégistrée avec succès'
-				})
+				this.form.validateFields((err, values) => {
+
+				this.visible = false;
+					if ( !err ) {
+						/*axios({
+							method: 'post',
+							url: 'http://localhost:8080/teacher/work',
+							data: {
+								title: values.title,
+								description: values.description,
+								date: values.date,
+								course_id: this.current_course,
+							}
+						})
+						.then((response) => {
+							if (response.data.success) {
+								Toast.fire({
+								icon: 'success',
+								title: response.data.message
+							})
+							} else {
+								Toast.fire({
+									icon: 'success',
+									title: response.data.message
+								})
+							}
+						}).catch(err => console.log(err))*/
+						
+						let storeValues = {
+							fullname: values.lastname + ' ' + values.middlename + ' ' + values.firstname,
+							email: values.email,
+							sexe: values.sexe
+						}
+
+						this.addProfStore(storeValues)
+					}
+				});
 			},
 			
 			handleChange(info) {
@@ -281,15 +334,6 @@
 				console.log(key);
 			},
 
-			handleSubmit(e) {
-				e.preventDefault();
-				this.form.validateFields((err, values) => {
-					if (!err) {
-					console.log('Received values of form: ', values);
-					}
-				});
-			},
-			
 			handleSelectChange(value) {
 				console.log(value);
 				this.form.setFieldsValue({
