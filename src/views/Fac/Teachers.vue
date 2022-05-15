@@ -29,7 +29,7 @@
 					<!-- Test table -->
 					<a-table class="mt-20"
 						:columns="columns"
-						:data-source="data"
+						:data-source="profs"
 						:pagination="{pageSize: pageSize,}"
 					>
 
@@ -50,30 +50,38 @@
 				</a-card>
 				<!-- / Test List card -->
         
-        <a-modal v-model="visible" title="Enrégistrer une épreuve" @ok="handleOk">
-            <a-form :form="form" @submit="handleSubmit">
-				<a-form-item class="mb-10" label="Date" :colon="false">
-					<a-input type="date" placeholder="Basic usage" />
+        <a-modal v-model="visible" title="Enrégistrer un professeur" @ok="handleOk">
+            <a-form :form="form" @submit="handleSubmit" class="row">
+				<a-form-item class="mb-10 col-md-6" label="Nom" :colon="false">
+					<a-input type="text" placeholder="Nom du professeur" />
 				</a-form-item>
 
-				<a-form-item class="mb-10" label="Donnez un titre à l'épreuve" :colon="false">
-					<a-input placeholder="Intitulé" />
+				<a-form-item class="mb-10" label="Postnom" :colon="false">
+					<a-input type="text" placeholder="Postnom du professeur" />
 				</a-form-item>
 
-				<a-form-item label="Type d'épreuve">
+				<a-form-item class="mb-10" label="Prenom" :colon="false">
+					<a-input type="text" placeholder="Prenom du professeur" />
+				</a-form-item>
+
+				<a-form-item class="mb-10" label="Email" :colon="false">
+					<a-input placeholder="Adresse email du professeur" />
+				</a-form-item>
+
+				<a-form-item label="Sexe">
 					<a-select
 						v-decorator="[
-							'type',
-							{ rules: [{ required: true, message: 'Please select your gender!' }] },
+							'sexe',
+							{ rules: [{ required: true, message: 'Veuillez selectionner un sexe!' }] },
 						]"
-						placeholder="Selectionnez une épreuve parmis celles enrégistrées"
+						placeholder="Selectionnez un sex parmis ceux enrégistrés"
 						@change="handleSelectChange"
 					>
-						<a-select-option value="male">
-						Examen
+						<a-select-option value="m">
+						Homme
 						</a-select-option>
-						<a-select-option value="female">
-						Autre
+						<a-select-option value="f">
+						Femme
 						</a-select-option>
 					</a-select>
 				</a-form-item>
@@ -87,6 +95,10 @@
 
 <script>
 
+	import store from '@/store'
+	import Vuex from 'vuex'
+
+
 	// Table columns
 	const columns = [
 		{
@@ -97,21 +109,21 @@
 			scopedSlots: { customRender: 'id' },
 		},
 		{
-			title: 'DATE',
-			dataIndex: 'date',
-			sorter: (a, b) => a.date.length - b.date.length,
+			title: 'Nom comptet',
+			dataIndex: 'fullname',
+			sorter: (a, b) => a.fullname.length - b.fullname.length,
 			sortDirections: ['descend', 'ascend'],
 		},
 		{
-			title: 'TYPE',
-			dataIndex: 'type',
-			sorter: (a, b) => stringSorter(a, b, 'type'),
+			title: 'Email',
+			dataIndex: 'email',
+			sorter: (a, b) => stringSorter(a, b, 'email'),
 			sortDirections: ['descend', 'ascend'],
 		},
 		{
-			title: 'INTITULÉ',
-			dataIndex: 'name',
-			sorter: (a, b) => parseFloat(a.revenue) - parseFloat(b.revenue),
+			title: 'SEXE',
+			dataIndex: 'sexe',
+			sorter: (a, b) => a.sexe.length - b.sexe.length,
 			sortDirections: ['descend', 'ascend'],
 			scopedSlots: { customRender: 'name' },
 		},
@@ -124,138 +136,10 @@
 
 	// Table rows
 	const data = [
-		{
-			"key": 10421,
-			"date": "1 Nov, 10:20 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Orlando Imieto",
-				"avatar": "images/team-2.jpg",
-			},
-			"product": "Nike Sport V2",
-			"revenue": "140.20",
-		},
-		{
-			"key": 10422,
-			"date": "1 Nov, 10:53 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Alice Murinho",
-				"avatar": "images/team-1.jpg",
-			},
-			"product": "Valvet T-shirt",
-			"revenue": "42.00",
-		},
-		{
-			"key": 10423,
-			"date": "1 Nov, 11:13 AM",
-			"status": "Refunded",
-			"customer": {
-				"name": "Michael Mirra",
-			},
-			"product": "Leather Wallet",
-			"extra": "+1 more",
-			"revenue": "25.50",
-		},
-		{
-			"key": 10424,
-			"date": "1 Nov, 12:20 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Andrew Nichel",
-				"avatar": "images/team-3.jpg",
-			},
-			"product": "Bracelet Onu-Lino",
-			"revenue": "19.40",
-		},
-		{
-			"key": 10425,
-			"date": "1 Nov, 1:40 PM",
-			"status": "Canceled",
-			"customer": {
-				"name": "Sebastian Koga",
-				"avatar": "images/team-4.jpg",
-			},
-			"product": "Phone Case Pink",
-			"extra": "x 2",
-			"revenue": "44.90",
-		},
-		{
-			"key": 10426,
-			"date": "1 Nov, 2:19 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Laur Gilbert",
-			},
-			"product": "Backpack Niver",
-			"revenue": "112.50",
-		},
-		{
-			"key": 10427,
-			"date": "1 Nov, 3:42 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Iryna Innda",
-			},
-			"product": "Adidas Vio",
-			"revenue": "200.00",
-		},
-		{
-			"key": 10428,
-			"date": "2 Nov, 9:32 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Arrias Liunda",
-			},
-			"product": "Airpods 2 Gen",
-			"revenue": "350.00",
-		},
-		{
-			"key": 10429,
-			"date": "2 Nov, 10:14 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Rugna Ilpio",
-				"avatar": "images/team-5.jpg",
-			},
-			"product": "Bracelet Warret",
-			"revenue": "15.00",
-		},
-		{
-			"key": 10430,
-			"date": "2 Nov, 12:56 PM",
-			"status": "Refunded",
-			"customer": {
-				"name": "Anna Landa",
-				"avatar": "images/ivana-squares.jpg",
-			},
-			"product": "Watter Bottle India",
-			"extra": "x 3",
-			"revenue": "25.00",
-		},
-		{
-			"key": 10431,
-			"date": "2 Nov, 3:12 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Karl Innas",
-			},
-			"product": "Kitchen Gadgets",
-			"revenue": "164.90",
-		},
-		{
-			"key": 10432,
-			"date": "2 Nov, 5:12 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Oana Kilas",
-			},
-			"product": "Office Papers",
-			"revenue": "23.90",
-		},
 	];
 
 	export default {
+		store:store,
 		components: {
 		},
 		data() {
@@ -263,9 +147,6 @@
 				
 				// Table columns
 				columns,
-				
-				// Table rows
-				data,
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -346,23 +227,6 @@
 				this.selectedRowKeys = selectedRowKeys;
 			},
 
-			// Export table in CSV format.
-			csvExport(arrData) {
-				let csvContent = "data:text/csv;charset=utf-8,";
-				csvContent += [
-					Object.keys(arrData[0]).join("|"),
-					...arrData.map(item => Object.values(item).join("|"))
-				]
-					.join("\n")
-					.replace(/(^\[)|(\]$)/gm, "");
-
-				const data = encodeURI(csvContent);
-				const link = document.createElement("a");
-				link.setAttribute("href", data);
-				link.setAttribute("download", "muse-dashboard-csv.csv");
-				link.click();
-			},
-
 			// Event handler for first table's size change.
 			onPageSizeChange() {
 				this.pageSize = parseInt( this.pageSize ) ;
@@ -434,6 +298,12 @@
 			},
 						
 		},
+
+		computed: {
+			...Vuex.mapGetters({
+				data: 'profs'
+			}),
+		}
 	}
 </script>
 

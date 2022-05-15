@@ -1,6 +1,10 @@
 // VueJS
 import Vue from 'vue'
 
+//Vuex
+import Vuex from 'vuex'
+Vue.use(Vuex)
+
 // Ant Design Vue
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';

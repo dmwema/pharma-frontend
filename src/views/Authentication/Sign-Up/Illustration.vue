@@ -127,7 +127,6 @@
 			<!-- / Sign Up Image Column -->
 
 		</a-row>
-		
 	</div>
 </template>
 
@@ -221,19 +220,22 @@
 			}
 		},
 		beforeMount() {
-			this.$eventHub.$emit('clsLoader');
 			axios({
 				method: 'post',
-				url: 'http://localhost:8080/checklink',
+				url: 'https://pharma-delib-api.herokuapp.com/checklink',
 				data: {
 					link: this.$route.params.link
 				}
 			})
 			.then((response) => {
-				if (response.data.success)
+				if (response.data.success) {
 					this.prof_names = response.data.professor.firstname + ' ' + response.data.professor.lastname
-				else 
+					//this.$root.hideLoader()
+				} else { 
 					this.$router.push(this.$route.params.link + '/not-found')
+					console.log(this.$root)
+					//this.$root.hideLoader()
+				}
 			}).catch(err => console.log(err))
 		},
 	})
