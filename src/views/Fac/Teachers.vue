@@ -35,11 +35,11 @@
 
 						<template slot="id" slot-scope="id">#{{ id }}</template>
 
-						<template slot="actions">
-							<a-button @click="deleteRow" icon="delete" type="danger" class="btn-status border-danger mr-5">
+						<template slot="actions"  slot-scope="id">
+							<a-button @click="deleteRow(id)" icon="delete" type="danger" class="btn-status border-danger mr-5">
 								Suppr.
 							</a-button>	
-							<a-button @click="showEditModal" icon="edit" type="primary" class="btn-status border-primary mr-5">
+							<a-button @click="showEditModal(id)" icon="edit" type="primary" class="btn-status border-primary mr-5">
 								Modif.
 							</a-button>		
 						</template>	
@@ -104,6 +104,93 @@
 					
 			</a-form>
         </a-modal>	
+        
+        <a-modal v-model="visible2" title="Modifier les information du professeur" @ok="handleOk2">
+            <a-form :form="form_edit" class="row">
+				<a-form-item class="mb-10 col-md-6" label="Nom" :colon="false">
+					<a-input 
+						v-decorator="[
+							'lastname',
+							{ 
+								rules: [{ required: true, message: 'Ce champ est réquis' }],
+								initialValue: selectedProf.fullname.split(' ')[0]
+							},
+						]" type="text" placeholder="Nom du professeur"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" label="Postnom" :colon="false">
+					<a-input 
+						v-decorator="[
+							'middlename',
+							{ 
+								rules: [{ required: true, message: 'Ce champ est requis' }],
+								initialValue: selectedProf.fullname.split(' ')[1]
+							},
+						]" type="text" placeholder="Postnom du professeur"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" :colon="false">
+					<a-input 
+						v-decorator="[
+							'key',
+							{ 
+								initialValue: selectedProf.key
+							},
+						]" type="hidden"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" :colon="false">
+					<a-input 
+						v-decorator="[
+							'id',
+							{ 
+								initialValue: selectedProf.id
+							},
+						]" type="hidden"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" label="Prenom" :colon="false">
+					<a-input 
+						v-decorator="[
+							'firstname',
+							{ 
+								rules: [{ required: true, message: 'Veuillez entre l\'adresse email!' }] ,
+								initialValue: selectedProf.fullname.split(' ')[2]
+							},
+						]" type="text" placeholder="Prenom du professeur"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" label="Email" :colon="false">
+					<a-input 
+						v-decorator="[
+							'email',
+							{ 
+								rules: [{ required: true, message: 'Veuillez entrer une adresse email!' }],
+								initialValue: selectedProf.email
+							},
+						]" placeholder="Adresse email du professeur"/>
+				</a-form-item>
+
+				<a-form-item label="Sexe">
+					<a-select
+						v-decorator="[
+							'sexe',
+							{ rules: [{ required: true, message: 'Veuillez selectionner un sexe!' }] },
+						]"
+						placeholder="Selectionnez un sex parmis ceux enrégistrés"
+						@change="handleSelectChange"
+					>
+						<a-select-option value="m">
+						Homme
+						</a-select-option>
+						<a-select-option value="f">
+						Femme
+						</a-select-option>
+					</a-select>
+				</a-form-item>
+					
+			</a-form>
+        </a-modal>	
 		
 	</div>
 
@@ -111,7 +198,7 @@
 
 <script>
 
-	import store from '@/store'
+	import store from '../../store/fac'
 	import Vuex from 'vuex'
 
 
@@ -122,7 +209,7 @@
 			dataIndex: 'key',
 			sorter: (a, b) => a.key - b.key,
 			sortDirections: ['descend', 'ascend'],
-			scopedSlots: { customRender: 'id' },
+			scopedSlots: { customRender: 'key' },
 		},
 		{
 			title: 'Nom comptet',
@@ -145,7 +232,7 @@
 		},
 		{
 			title: '',
-			dataIndex: 'actions',
+			dataIndex: 'id',
 			scopedSlots: { customRender: 'actions' },
 		},
 	];
@@ -155,6 +242,8 @@
 	];
 
 	export default {
+		created () {
+		},
 		store:store,
 		components: {
 		},
@@ -175,22 +264,29 @@
 
 				//modal visibility
       			visible: false,
+
+				//modal visibility
+      			visible2: false,
 				
 				formLayout: 'horizontal',
       			
 				form: this.$form.createForm(this, { name: 'coordinated' }),
+      			
+				form_edit: this.$form.createForm(this, { name: 'editform' }),
 
 				// Table's selected rows
       			selectedRowKeys: [],
-
 			}
 		},
 		methods: {
 			...Vuex.mapActions({
-					addProfStore: 'addProf'
+				editSelectedProf: 'editSelectedProf',
+				addProfStore: 'addProf',
+				editProfStore: 'editProf',
+				deleteProf: 'deleteProf',
 			}),
 
-			deleteRow() {
+			deleteRow(id) {
 				this.$swal.fire({
 					title: "Êtes-vous sûre ?",
 					text: "Une fois supprimée, vous n'allez plus récuperer cette information",
@@ -202,8 +298,8 @@
 					dangerMode: true,
 				}).then((result) => {
 				if (result.isConfirmed) {
-					console.log('canceled')
 				} else if (result.isDenied) {
+					this.deleteProf(id)
 					const Toast = this.$swal.mixin({
 						toast: true,
 						position: 'top-end',
@@ -211,8 +307,8 @@
 						timer: 2000,
 						timerProgressBar: false,
 						didOpen: (toast) => {
-							toast.addEventListener('mouseenter', Swal.stopTimer)
-							toast.addEventListener('mouseleave', Swal.resumeTimer)
+							toast.addEventListener('mouseenter', this.$swal.stopTimer)
+							toast.addEventListener('mouseleave', this.$swal.resumeTimer)
 						}
 					})
 
@@ -261,8 +357,9 @@
 				this.visible = true;
 			},
 
-			showEditModal() {
-				this.visible = true;
+			showEditModal(id) {
+				this.editSelectedProf(id)
+				this.visible2 = true;
 			},
 			handleOk(e) {
 				e.preventDefault();
@@ -280,42 +377,34 @@
 				})
 
 				this.form.validateFields((err, values) => {
-
-				this.visible = false;
+					this.visible = false;
 					if ( !err ) {
-						/*axios({
-							method: 'post',
-							url: 'http://localhost:8080/teacher/work',
-							data: {
-								title: values.title,
-								description: values.description,
-								date: values.date,
-								course_id: this.current_course,
-							}
-						})
-						.then((response) => {
-							if (response.data.success) {
-								Toast.fire({
-								icon: 'success',
-								title: response.data.message
-							})
-							} else {
-								Toast.fire({
-									icon: 'success',
-									title: response.data.message
-								})
-							}
-						}).catch(err => console.log(err))*/
-						
-						let storeValues = {
-							fullname: values.lastname + ' ' + values.middlename + ' ' + values.firstname,
-							email: values.email,
-							sexe: values.sexe
-						}
-
-						this.addProfStore(storeValues)
+						this.addProfStore(values)
 					}
 				});
+			},
+			handleOk2(e) {
+				e.preventDefault();
+
+				const Toast = this.$swal.mixin({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 2000,
+					timerProgressBar: false,
+					didOpen: (toast) => {
+						toast.addEventListener('mouseenter', this.$swal.stopTimer)
+						toast.addEventListener('mouseleave', this.$swal.resumeTimer)
+					}
+				})
+
+				this.form_edit.validateFields((err, values) => {
+					this.visible2 = false;
+					if ( !err ) {
+						this.editProfStore(values)
+					}
+				});
+			
 			},
 			
 			handleChange(info) {
@@ -330,22 +419,16 @@
 				}
 			},
 			
-			callback(key) {
-				console.log(key);
-			},
-
 			handleSelectChange(value) {
-				console.log(value);
-				this.form.setFieldsValue({
-					note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`,
-				});
 			},
 						
 		},
 
 		computed: {
 			...Vuex.mapGetters({
-				data: 'profs'
+				data: 'profs',
+				profsCount: 'profsCount',
+				selectedProf: 'selectedProf',
 			}),
 		}
 	}
