@@ -18,7 +18,6 @@
 				<b>Gestion Faculté</b>
 			</div>
 			<hr>
-
 			<!-- Sidebar Navigation Menu -->
 			<a-menu theme="light" mode="inline"
       			:open-keys="openKeys"
@@ -55,9 +54,9 @@
 						<span class="label">Cours</span>
 					</span>
 					<a-menu-item-group>
-						<a-menu-item>
-							<router-link to="/f/courses">
-								<span class="label">G1 Informatique</span>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id"> 
+							<router-link :to="'/f/courses/' + promotion.id">
+								<span class="label">{{ promotion.name }}</span>
 							</router-link>
 						</a-menu-item>
 						</a-menu-item-group>
@@ -71,12 +70,12 @@
 						<span class="label">Etudiants</span>
 					</span>
 					<a-menu-item-group>
-						<a-menu-item>
-							<router-link to="/t/ratings">
-								<span class="label">G1 Informatique</span>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id">
+							<router-link :to="'/f/students/' + promotion.id">
+								<span class="label">{{ promotion.name }}</span>
 							</router-link>
 						</a-menu-item>
-						</a-menu-item-group>
+					</a-menu-item-group>
 				</a-sub-menu>	
 			</a-menu>
 			<!-- / Sidebar Navigation Menu -->
@@ -84,17 +83,21 @@
 			
 			<!-- Sidebar Navigation Menu -->
 			<a-menu theme="light" mode="inline">
-				<a-menu-item>
-					<router-link to="/t/deliberation">
-
-					<a href="#" style="padding-left:0">
+				<a-sub-menu key="deliberation" style="padding: 0;">
+					<span slot="title">
 						<span class="icon">
-							<a-icon type="read" theme="filled" class="m-0" />
+							<a-icon type="appstore" theme="filled" class="m-0" />
 						</span>
 						<span class="label">Délibération</span>
-					</a>
-					</router-link>
-				</a-menu-item>
+					</span>
+					<a-menu-item-group>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id">
+							<router-link :to="'/f/deliberation/' + promotion.id">
+								<span class="label">{{ promotion.name }}</span>
+							</router-link>
+						</a-menu-item>
+					</a-menu-item-group>
+				</a-sub-menu>	
 			</a-menu>
 			<!-- / Sidebar Navigation Menu -->
 	</a-layout-sider>
@@ -103,6 +106,9 @@
 </template>
 
 <script>
+
+	import store from '../../store/fac'
+	import Vuex from 'vuex'
 
 	export default ({
 		props: {
@@ -150,6 +156,17 @@
 				}
 			},
 		},
+
+		computed: {
+			...Vuex.mapGetters({
+				promotions: 'promotions',
+			}),
+		},
+
+		created() {
+    		this.$store.dispatch('getPromotions')
+		}
+
 	})
 
 </script>

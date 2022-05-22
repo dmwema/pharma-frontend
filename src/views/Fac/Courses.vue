@@ -35,11 +35,12 @@
 
 						<template slot="id" slot-scope="id">#{{ id }}</template>
 
-						<template slot="actions">
-							<a-button @click="deleteRow" icon="delete" type="danger" class="btn-status border-danger mr-5">
+
+						<template slot="actions"  slot-scope="id">
+							<a-button @click="deleteRow(id)" icon="delete" type="danger" class="btn-status border-danger mr-5">
 								Suppr.
 							</a-button>	
-							<a-button @click="showEditModal" icon="edit" type="primary" class="btn-status border-primary mr-5">
+							<a-button @click="showEditModal(id)" icon="edit" type="primary" class="btn-status border-primary mr-5">
 								Modif.
 							</a-button>		
 						</template>	
@@ -50,42 +51,108 @@
 				</a-card>
 				<!-- / Test List card -->
         
-        <a-modal v-model="visible" title="Enrégistrer une épreuve" @ok="handleOk">
-            <a-form :form="form" @submit="handleSubmit">
-				<a-form-item class="mb-10" label="Date" :colon="false">
-					<a-input type="date" placeholder="Basic usage" />
-				</a-form-item>
-
-				<a-form-item class="mb-10" label="Donnez un titre à l'épreuve" :colon="false">
-					<a-input placeholder="Intitulé" />
-				</a-form-item>
-
-				<a-form-item label="Type d'épreuve">
-					<a-select
+        <a-modal v-model="visible" title="Enrégistrer un cours" @ok="handleOk">
+            <a-form :form="form" class="row">
+				<a-form-item class="mb-10 col-md-6" label="Intitulé" :colon="false">
+					<a-input 
 						v-decorator="[
-							'type',
-							{ rules: [{ required: true, message: 'Please select your gender!' }] },
+							'title',
+							{ rules: [{ required: true, message: 'Ce champ est réquis' }] },
+						]" type="text" placeholder="Intitulé du cours" />
+				</a-form-item>
+
+				<a-form-item class="mb-10" label="Pondération" :colon="false">
+					<a-input 
+						v-decorator="[
+							'ponderation',
+							{ rules: [{ required: true, message: 'Ce champ est requis' }] },
+						]" type="number" placeholder="Pondération"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" :colon="false">
+					<a-input 
+						v-decorator="[
+							'promotion_id',
+							{ rules: [{ required: true, message: 'Ce champ est requis' }],
+							initialValue: 1 },
+						]" type="hidden"/>
+				</a-form-item>
+ 
+				<a-form-item label="Professeur">
+					<a-select 
+						v-decorator="[
+							'professor_id',
+							{ rules: [{ required: true, message: 'Veuillez selectionner un sexe!' }] },
 						]"
-						placeholder="Selectionnez une épreuve parmis celles enrégistrées"
-						@change="handleSelectChange"
+						placeholder="Selectionnez un professeur parmis ceux enrégistrés"
 					>
-						<a-select-option value="male">
-						Examen
+						<a-select-option :value="prof.id" v-for="prof in profs" :key="prof.id">
+						{{ prof.fullname }}
 						</a-select-option>
-						<a-select-option value="female">
-						Autre
+					</a-select>
+				</a-form-item>
+			</a-form>
+        </a-modal>	
+        
+        <a-modal v-model="visible2" title="Modifier les information du cours" @ok="handleOk2">
+            <a-form :form="form_edit" class="row">
+				<a-form-item class="mb-10 col-md-6" label="Intitulé" :colon="false">
+					<a-input 
+						v-decorator="[
+							'titile',
+							{ 
+								rules: [{ required: true, message: 'Ce champ est réquis' }],
+								initialValue: selectedCourse.title
+							},
+						]" type="text" placeholder="Intitulé du cours"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" :colon="false">
+					<a-input 
+						v-decorator="[
+							'id',
+							{ rules: [{ required: true, message: 'Ce champ est requis' }],
+							initialValue: selectedCourse.id },
+						]" type="hidden"/>
+				</a-form-item>
+
+				<a-form-item class="mb-10" label="Pondération" :colon="false">
+					<a-input 
+						v-decorator="[
+							'ponderation',
+							{ 
+								rules: [{ required: true, message: 'Ce champ est requis' }],
+								initialValue: selectedCourse.ponderation
+							},
+						]" type="text" placeholder="Pondération"/>
+				</a-form-item>
+ 
+				<a-form-item label="Professeur">
+					<a-select 
+						v-decorator="[
+							'professor',
+							{ rules: [{ required: true, message: 'Veuillez selectionner un sexe!' }] },
+						]"
+						placeholder="Selectionnez un professeur parmis ceux enrégistrés"
+					>
+						<a-select-option :value="prof.id" v-for="prof in profs" :key="prof.id">
+						{{ prof.fullname }}
 						</a-select-option>
 					</a-select>
 				</a-form-item>
 					
 			</a-form>
-        </a-modal>	
+        </a-modal>
 		
 	</div>
 
 </template>
 
 <script>
+
+	import store from '../../store/fac'
+	import Vuex from 'vuex'
+	import Api from '../../apis/Api'
 
 	// Table columns
 	const columns = [
@@ -97,162 +164,33 @@
 			scopedSlots: { customRender: 'id' },
 		},
 		{
-			title: 'DATE',
-			dataIndex: 'date',
-			sorter: (a, b) => a.date.length - b.date.length,
-			sortDirections: ['descend', 'ascend'],
-		},
-		{
-			title: 'TYPE',
-			dataIndex: 'type',
-			sorter: (a, b) => stringSorter(a, b, 'type'),
-			sortDirections: ['descend', 'ascend'],
-		},
-		{
 			title: 'INTITULÉ',
-			dataIndex: 'name',
-			sorter: (a, b) => parseFloat(a.revenue) - parseFloat(b.revenue),
+			dataIndex: 'title',
+			sorter: (a, b) => a.title.length - b.title.length,
+			sortDirections: ['descend', 'ascend'],
+		},
+		{
+			title: 'PONDÉRATION',
+			dataIndex: 'ponderation',
+			sorter: (a, b) => stringSorter(a, b, 'ponderation'),
+			sortDirections: ['descend', 'ascend'],
+		},
+		{
+			title: 'PROFESSEUR',
+			dataIndex: 'professor',
+			sorter: (a, b) => stringSorter(a, b, 'professor'),
 			sortDirections: ['descend', 'ascend'],
 			scopedSlots: { customRender: 'name' },
 		},
 		{
 			title: '',
-			dataIndex: 'actions',
+			dataIndex: 'id',
 			scopedSlots: { customRender: 'actions' },
 		},
 	];
 
 	// Table rows
 	const data = [
-		{
-			"key": 10421,
-			"date": "1 Nov, 10:20 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Orlando Imieto",
-				"avatar": "images/team-2.jpg",
-			},
-			"product": "Nike Sport V2",
-			"revenue": "140.20",
-		},
-		{
-			"key": 10422,
-			"date": "1 Nov, 10:53 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Alice Murinho",
-				"avatar": "images/team-1.jpg",
-			},
-			"product": "Valvet T-shirt",
-			"revenue": "42.00",
-		},
-		{
-			"key": 10423,
-			"date": "1 Nov, 11:13 AM",
-			"status": "Refunded",
-			"customer": {
-				"name": "Michael Mirra",
-			},
-			"product": "Leather Wallet",
-			"extra": "+1 more",
-			"revenue": "25.50",
-		},
-		{
-			"key": 10424,
-			"date": "1 Nov, 12:20 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Andrew Nichel",
-				"avatar": "images/team-3.jpg",
-			},
-			"product": "Bracelet Onu-Lino",
-			"revenue": "19.40",
-		},
-		{
-			"key": 10425,
-			"date": "1 Nov, 1:40 PM",
-			"status": "Canceled",
-			"customer": {
-				"name": "Sebastian Koga",
-				"avatar": "images/team-4.jpg",
-			},
-			"product": "Phone Case Pink",
-			"extra": "x 2",
-			"revenue": "44.90",
-		},
-		{
-			"key": 10426,
-			"date": "1 Nov, 2:19 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Laur Gilbert",
-			},
-			"product": "Backpack Niver",
-			"revenue": "112.50",
-		},
-		{
-			"key": 10427,
-			"date": "1 Nov, 3:42 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Iryna Innda",
-			},
-			"product": "Adidas Vio",
-			"revenue": "200.00",
-		},
-		{
-			"key": 10428,
-			"date": "2 Nov, 9:32 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Arrias Liunda",
-			},
-			"product": "Airpods 2 Gen",
-			"revenue": "350.00",
-		},
-		{
-			"key": 10429,
-			"date": "2 Nov, 10:14 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Rugna Ilpio",
-				"avatar": "images/team-5.jpg",
-			},
-			"product": "Bracelet Warret",
-			"revenue": "15.00",
-		},
-		{
-			"key": 10430,
-			"date": "2 Nov, 12:56 PM",
-			"status": "Refunded",
-			"customer": {
-				"name": "Anna Landa",
-				"avatar": "images/ivana-squares.jpg",
-			},
-			"product": "Watter Bottle India",
-			"extra": "x 3",
-			"revenue": "25.00",
-		},
-		{
-			"key": 10431,
-			"date": "2 Nov, 3:12 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Karl Innas",
-			},
-			"product": "Kitchen Gadgets",
-			"revenue": "164.90",
-		},
-		{
-			"key": 10432,
-			"date": "2 Nov, 5:12 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Oana Kilas",
-			},
-			"product": "Office Papers",
-			"revenue": "23.90",
-		},
 	];
 
 	export default {
@@ -263,9 +201,6 @@
 				
 				// Table columns
 				columns,
-				
-				// Table rows
-				data,
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -278,10 +213,15 @@
 
 				//modal visibility
       			visible: false,
+
+				//modal visibility
+      			visible2: false,
 				
 				formLayout: 'horizontal',
       			
 				form: this.$form.createForm(this, { name: 'coordinated' }),
+      			
+				form_edit: this.$form.createForm(this, { name: 'editform' }),
 
 				// Table's selected rows
       			selectedRowKeys: [],
@@ -289,37 +229,29 @@
 			}
 		},
 		methods: {
-			deleteRow() {
+			...Vuex.mapActions({
+				editSelectedCourse: 'editSelectedCourse',
+				addCourseStore: 'addCourse',
+				editCourseStore: 'editCourse',
+				deleteCourse: 'deleteCourse',
+			}),
+
+			deleteRow(id) {
+				this.editSelectedCourse(id)
 				this.$swal.fire({
-					title: "Êtes-vous sûre ?",
-					text: "Une fois supprimée, vous n'allez plus récuperer cette information",
+					title: "Êtes-vous sûr de vouloir supprimer ce cours ?",
+					text: "Une fois supprimées, vous n'allez plus récuperer ces informations",
 					icon: "warning",
 					showDenyButton: true,
-				  	denyButtonText: `Supprimer`,
+					denyButtonText: `Supprimer`,
 					confirmButtonText: 'Annuler',
-  					focusConfirm: false,
+					focusConfirm: false,
 					dangerMode: true,
 				}).then((result) => {
 				if (result.isConfirmed) {
-					console.log('canceled')
-				} else if (result.isDenied) {
-					const Toast = this.$swal.mixin({
-						toast: true,
-						position: 'top-end',
-						showConfirmButton: false,
-						timer: 2000,
-						timerProgressBar: false,
-						didOpen: (toast) => {
-							toast.addEventListener('mouseenter', Swal.stopTimer)
-							toast.addEventListener('mouseleave', Swal.resumeTimer)
-						}
-					})
-
-					Toast.fire({
-						icon: 'success',
-						title: 'Épreuve supprimée avec succès'
-					})
-				}
+					} else if (result.isDenied) {
+						this.deleteCourse(id)
+					}
 				})
 			},
 			// Event listener for input change on table search field.
@@ -377,11 +309,13 @@
 				this.visible = true;
 			},
 
-			showEditModal() {
-				this.visible = true;
+			showEditModal(id) {
+				this.editSelectedCourse(id)
+				this.visible2 = true;
 			},
+			
 			handleOk(e) {
-				this.visible = false;
+				e.preventDefault();
 
 				const Toast = this.$swal.mixin({
 					toast: true,
@@ -390,15 +324,39 @@
 					timer: 2000,
 					timerProgressBar: false,
 					didOpen: (toast) => {
-						toast.addEventListener('mouseenter', Swal.stopTimer)
-						toast.addEventListener('mouseleave', Swal.resumeTimer)
+						toast.addEventListener('mouseenter', this.$swal.stopTimer)
+						toast.addEventListener('mouseleave', this.$swal.resumeTimer)
 					}
 				})
 
-				Toast.fire({
-					icon: 'success',
-					title: 'Épreue enrégistrée avec succès'
+				this.form.validateFields((err, values) => {
+					this.visible = false;
+					if ( !err ) {
+						this.addCourseStore(values)
+					}
+				});
+			},
+			handleOk2(e) {
+				e.preventDefault();  
+				const Toast = this.$swal.mixin({
+					toast: true,
+					position: 'top-end',
+					showConfirmButton: false,
+					timer: 2000,
+					timerProgressBar: false,
+					didOpen: (toast) => {
+						toast.addEventListener('mouseenter', this.$swal.stopTimer)
+						toast.addEventListener('mouseleave', this.$swal.resumeTimer)
+					}
 				})
+
+				this.form_edit.validateFields((err, values) => {
+					this.visible2 = false;
+					if ( !err ) {
+						this.editCourseStore(values)
+					}
+				});
+			
 			},
 			
 			handleChange(info) {
@@ -425,15 +383,22 @@
 					}
 				});
 			},
-			
-			handleSelectChange(value) {
-				console.log(value);
-				this.form.setFieldsValue({
-					note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`,
-				});
-			},
 						
 		},
+
+		computed: {
+			...Vuex.mapGetters({
+				data: 'courses',
+				profs: 'profs',
+				profsCount: 'coursesCount',
+				selectedCourse: 'selectedCourse',
+			}),
+		},
+
+		created() {
+    		this.$store.dispatch('getCourses')
+    		this.$store.dispatch('getProfs')
+		}
 	}
 </script>
 

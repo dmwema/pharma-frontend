@@ -42,6 +42,12 @@
 							<a-button @click="showEditModal(id)" icon="edit" type="primary" class="btn-status border-primary mr-5">
 								Modif.
 							</a-button>		
+							<a-button v-if="!has_login(id)" @click="genLogin(id)" icon="eye" type="default" clalss="btn-status border-default mr-5">
+								Login
+							</a-button>	
+							<a-button v-if="has_login(id)" @click="genLogin(id)" icon="eye" type="default" clalss="btn-status border-default mr-5">
+								Voir
+							</a-button>		
 						</template>	
 
 					</a-table>
@@ -50,6 +56,7 @@
 				</a-card>
 				<!-- / Test List card -->
         
+
         <a-modal v-model="visible" title="Enrégistrer un professeur" @ok="handleOk">
             <a-form :form="form" class="row">
 				<a-form-item class="mb-10 col-md-6" label="Nom" :colon="false">
@@ -200,6 +207,7 @@
 
 	import store from '../../store/fac'
 	import Vuex from 'vuex'
+	import Api from '../../apis/Api'
 
 
 	// Table columns
@@ -276,6 +284,9 @@
 
 				// Table's selected rows
       			selectedRowKeys: [],
+
+				// genlogin() password verification
+				pass_verify: ""
 			}
 		},
 		methods: {
@@ -287,41 +298,106 @@
 			}),
 
 			deleteRow(id) {
+				this.editSelectedProf(id)
 				this.$swal.fire({
-					title: "Êtes-vous sûre ?",
-					text: "Une fois supprimée, vous n'allez plus récuperer cette information",
+					title: "Êtes-vous sûr de vouloir supprimer ce professeur ?",
+					text: "Une fois supprimées, vous n'allez plus récuperer ces informations",
 					icon: "warning",
 					showDenyButton: true,
-				  	denyButtonText: `Supprimer`,
+					denyButtonText: `Supprimer`,
 					confirmButtonText: 'Annuler',
-  					focusConfirm: false,
+					focusConfirm: false,
 					dangerMode: true,
 				}).then((result) => {
 				if (result.isConfirmed) {
-				} else if (result.isDenied) {
-					this.deleteProf(id)
-					const Toast = this.$swal.mixin({
-						toast: true,
-						position: 'top-end',
-						showConfirmButton: false,
-						timer: 2000,
-						timerProgressBar: false,
-						didOpen: (toast) => {
-							toast.addEventListener('mouseenter', this.$swal.stopTimer)
-							toast.addEventListener('mouseleave', this.$swal.resumeTimer)
-						}
-					})
+					} else if (result.isDenied) {
+						this.deleteProf(id)
+					}
+				})
+			},
 
-					Toast.fire({
-						icon: 'success',
-						title: 'Épreuve supprimée avec succès'
-					})
-				}
+			genLogin(id) {
+				const loginSwal = this.$swal.mixin({
+					customClass: {
+						confirmButton: 'btn-status border-primary mr-5 ant-btn ant-btn-primary',
+						cancelButton: 'btn-status border-danger mr-5 ant-btn ant-btn-danger'
+					},
+					buttonsStyling: false
+				})
+				this.editSelectedProf(id)
+				loginSwal.fire({
+					title: "ATTENTION",
+					text: "Vous êtes au point de générer des accès de connection pour le professeur " + this.selectedProf.fullname.split(' ')[0] + " " + this.selectedProf.fullname.split(' ')[1] + " " + this.selectedProf.fullname.split(' ')[2],
+					icon: "info",
+					input: "password",
+					preConfirm: (pass) => {
+						if (pass.length === 0) {
+							this.$swal.showValidationMessage(
+							`Vous devez entrer votre mot de passe pour des raisons de sécurité`
+							)
+						} else {
+						return Api.post('/admin-pass-verification', {
+							id: 1,
+							pass: 'password'
+						})
+						.then(response => {
+							if (!response.data.success) {
+								this.$swal.showValidationMessage(
+								`${response.data.message}`
+								)
+							} else {
+								Api.post('/generate', {
+									user_id: this.selectedProf.id,
+								})
+								.then(response => {
+									if (response.data.success) {
+										this.$swal.fire(
+											'Good job!',
+											'You clicked the button!',
+											'success'
+										)		
+									} else {
+										this.$swal.fire({
+											icon: 'error',
+											title: 'Oops...',
+											text: 'Les accès de connexion de ce professeur ont été déjà générés!',
+										})		
+									}
+								})
+								.catch(err => {
+									this.$swal.showValidationMessage(
+									`Erreur de connexion: ${err}`
+									)
+								})
+							}
+						})
+						.catch(error => {
+							this.$swal.showValidationMessage(
+							`Erreur de connexion: ${error}`
+							)
+						})}
+					},
+  					allowOutsideClick: () => !this.$swal.isLoading(),
+  					showLoaderOnConfirm: true,
+					inputAttributes: {
+						placeholder: 'votre mot de passe'
+					},
+  					reverseButtons: true,
+  					showCancelButton: true,
+					cancelButtonText: `Annuler`,
+					confirmButtonText: 'Générer',
+					focusConfirm: false,
+					dangerMode: true,
+				}).then((result) => {
+				if (result.isConfirmed) {
+					} else if (result.isDenied) {
+					}
 				})
 			},
 			// Event listener for input change on table search field.
 			onSearchChange() {
 				if( this.query.length > 0 ) {
+					console.log(data)
 					this.data = data.filter( (row) => {
 						for( const key in row ) {
 							if( row[ key ]
@@ -336,6 +412,16 @@
 				else {
 					this.data = data ;
 				}
+			},
+
+			has_login(id) {
+				console.log(data)
+				data.forEach(element => {
+					if (element.id === id) {
+						return element.has_logins
+					}
+				});
+				return false
 			},
 
 			// Event listener for table row selection change.
@@ -430,6 +516,10 @@
 				profsCount: 'profsCount',
 				selectedProf: 'selectedProf',
 			}),
+		},
+
+		created() {
+    		this.$store.dispatch('getProfs')
 		}
 	}
 </script>
