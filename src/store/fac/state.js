@@ -1,13 +1,31 @@
 export default {
   professors: [],
 
+  students: [],
+
+  api_url: "http://localhost:8000/api/",
+
   courses: [],
 
   students: [],
 
+  validProfLink: false,
+
   promotions: [],
 
   selectedProf: {
+    id: "",
+    key: "",
+    fullname: "",
+    email: "",
+    sexe: "",
+  },
+
+  selectedLoginProf: {
+    fullname: "",
+  },
+
+  selectedStudent: {
     id: "",
     key: "",
     fullname: "",

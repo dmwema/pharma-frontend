@@ -121,6 +121,18 @@ let routes = [
   },
 
   {
+    path: "/f/students/:promo_id",
+    name: "DashboardsFacStudent",
+    layout: "fac",
+    meta: {
+      title: "Etudiants",
+      sidebarMap: ["Student"],
+      breadcrumbs: ["Dashboards", "students"],
+    },
+    component: () => import("../views/Fac/Students.vue"),
+  },
+
+  {
     path: "/pages/profile/profile-overview",
     name: "ProfileOverview",
     layout: "dashboard",
@@ -370,14 +382,14 @@ let routes = [
     component: () => import("../views/Authentication/Sign-Up/Illustration.vue"),
   },
   {
-    path: "/t/login",
-    name: "Illustration Login",
+    path: "/login",
+    name: "Illustration Sign Up",
     layout: "default",
     meta: {
-      layoutClass: "layout-login-illustration",
-      title: "Illustration Login",
-      sidebarMap: ["authentication", "Login", "illustration"],
-      breadcrumbs: ["Authentication", "Login", "Illustration"],
+      layoutClass: "layout-sign-up-illustration",
+      title: "Illustration Sign Up",
+      sidebarMap: ["authentication", "sign-up", "illustration"],
+      breadcrumbs: ["Authentication", "Sign Up", "Illustration"],
       nofooter: true,
     },
     component: () => import("../views/Authentication/Sign-Up/Login.vue"),

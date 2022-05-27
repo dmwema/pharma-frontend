@@ -13,8 +13,8 @@
 					:after-close="handleClose"
 					style="margin-bottom:40px"
 				/>
-				<h4 class="mb-15">Se connecter</h4>
-				<p class="text-muted">Entrez le code de connexion pour se connecter</p>
+				<h4 class="mb-15">S'identifier</h4>
+				<p class="text-muted">Entrez le code de connexion pour vérifier qu'il s'agit bien de {{ prof_names }}</p>
 
 				<!-- Sign Up Form -->
 				<a-form
@@ -117,8 +117,8 @@
 			<!-- Sign Up Image Column -->
 			<a-col :span="24" :md="12" :lg="12" :xl="12" class="col-img">
 				<div>
-					<div class="img">
-						<img src="images/info-rocket-ill.png" alt="rocket">
+					<div class="img" style="margin-bottom:30px">
+						<img src="images/info-rocket-ill.svg" alt="rocket">
 					</div>
 					<h4 class="text-white">Bienvenue Professeur <br><b>{{ prof_names }}</b></h4>
 					<p class="text-white">Utilisez le code réçu <b> du decanat</b> pour vous connecter et gérer tout ce qui vous concerne en rapport avec la faculté</p>
@@ -131,7 +131,7 @@
 </template>
 
 <script>
-	import axios from 'axios';
+	import Vuex from 'vuex'
 
 	export default ({
 		data() {
@@ -150,19 +150,19 @@
 			}
 		},
 		methods: {
+			...Vuex.mapActions({
+				checkSecret: 'checkSecret',
+				editCredentials: 'editCredentials',
+			}),
 			// Handles input validation after submission.
 			handleSubmit(e) {
 				e.preventDefault();
 				this.visible = false;
 				this.form.validateFields((err, values) => {
 					if ( !err ) {
-						axios({
-							method: 'post',
-							url: 'http://localhost:8080/check',
-							data: {
-								link: this.$route.params.link,
-								secret: values.code
-							}
+						this.checkSecret({
+							link: this.$route.params.link,
+							code: values.code
 						})
 						.then((response) => {
 							if (response.data.success == false) {
@@ -180,25 +180,20 @@
 					if (values.password !== values.password_c) {
 						this.has_valid_error = true
 						this.valid_message = "Les deux mots de passes ne correspondent pas"
-						return null;
 					} else {
 						this.has_valid_error = false
 					}
 					if ( !err ) {
-						axios({
-							method: 'post',
-							url: 'http://localhost:8080/edit-credentials',
-							data: {
-								email: values.email,
-								password: values.password,
-								link: this.$route.params.link
-							}
+						this.editCredentials({
+							email: values.email,
+							password: values.password,
+							link: this.$route.params.link
 						})
 						.then((response) => {
 							if (response.data.saved) {
-								this.visible2 = true
+								//this.visible2 = true
+								this.$router.push("/login")
 							}
-							console.log(response.data)
 						}).catch(err => console.log(err))
 					}
 				});
@@ -219,24 +214,22 @@
 				}
 			}
 		},
-		beforeMount() {
-			axios({
-				method: 'post',
-				url: 'https://pharma-delib-api.herokuapp.com/checklink',
-				data: {
-					link: this.$route.params.link
-				}
-			})
-			.then((response) => {
-				if (response.data.success) {
-					this.prof_names = response.data.professor.firstname + ' ' + response.data.professor.lastname
-					//this.$root.hideLoader()
-				} else { 
-					this.$router.push(this.$route.params.link + '/not-found')
-					console.log(this.$root)
-					//this.$root.hideLoader()
-				}
-			}).catch(err => console.log(err))
+		computed: {
+			...Vuex.mapGetters({
+				validLink: 'validLink',
+				selectedLoginProf: 'selectedLoginProf',
+			}),
+		},
+		mounted() {
+    		 this.$store.dispatch('checklink', this.$route.params.link).then((datas) => {
+				 if(datas.data.success) {
+					this.prof_names = datas.data.professor.lastname + " " + datas.data.professor.middlename + " " + datas.data.professor.firstname
+				 } else {
+					 this.$router.push(this.$route.params.link + '/not-found')
+				 }
+			 }).catch((err) => {
+				 console.log(err)
+			 })
 		},
 	})
 

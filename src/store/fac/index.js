@@ -1,5 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import auth from "../auth";
+import loader from "../loader";
 
 Vue.use(Vuex);
 
@@ -14,6 +16,7 @@ let store = new Vuex.Store({
   getters: getters,
   actions: actions,
   strict: true,
+  modules: { auth, loader },
 });
 
 global.store = store;

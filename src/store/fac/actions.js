@@ -1,10 +1,11 @@
 import axios from "axios";
 import Toast from "../alert";
-import Swal from "sweetalert2";
+import state from "../fac/state";
 import Professor from "../../apis/Professor";
 import Department from "../../apis/Department";
 import Course from "../../apis/Course";
 import Jury from "../../apis/Jury";
+import Student from "../../apis/Student";
 
 export const getProfs = (store) => {
   Professor.all()
@@ -63,7 +64,7 @@ export const editProf = (store, prof) => {
 export const deleteProf = (store, id) => {
   Professor.delete(id)
     .then(function (response) {
-      if (response.data) store.commit("DELETE_PROF", id);
+      if (response.data.success) store.commit("DELETE_PROF", id);
       store.commit("SET_PROFS", response.data.profs);
       Toast.fire({
         icon: "success",
@@ -115,7 +116,7 @@ export const addCourse = (store, course) => {
 export const deleteCourse = (store, id) => {
   Course.delete(id)
     .then(function (response) {
-      if (response.data) {
+      if (response.data.success) {
         store.commit("GET_COURSES", response.data.courses);
         Toast.fire({
           icon: "success",
@@ -176,7 +177,7 @@ export const jury_addProf = (store, prof) => {
 export const jury_deleteProf = (store, data) => {
   Jury.delete(data)
     .then(function (response) {
-      if (response.data) {
+      if (response.data.success) {
         store.commit("GET_JURY", response.data.jury);
         Toast.fire({
           icon: "success",
@@ -192,7 +193,6 @@ export const jury_deleteProf = (store, data) => {
 export const editJury = (store, jury) => {
   Jury.update(jury)
     .then(function (response) {
-      console.log(response.data);
       console.log(response);
       if (response.data.success) {
         store.commit("GET_JURY", response.data.jury);
@@ -205,4 +205,103 @@ export const editJury = (store, jury) => {
     .catch(function (error) {
       console.log(error);
     });
+};
+
+// STUDENTS
+
+export const getStudents = (store) => {
+  Student.all()
+    .then(function (response) {
+      store.commit("GET_STUDENTS", response.data);
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+export const addStudent = (store, student) => {
+  Student.add(student)
+    .then((response) => {
+      if (response.data.success) {
+        store.commit("GET_STUDENTS", response.data.students);
+        Toast.fire({
+          icon: "success",
+          title: response.data.message,
+        });
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+};
+
+export const editStudent = (store, student) => {
+  Student.update(student)
+    .then(function (response) {
+      if (response.data.success) {
+        store.commit("GET_STUDENTS", response.data.students);
+        Toast.fire({
+          icon: "success",
+          title: response.data.message,
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+export const deleteStudent = (store, id) => {
+  Student.delete(id)
+    .then(function (response) {
+      if (response.data.success) {
+        store.commit("GET_STUDENTS", response.data.students);
+        Toast.fire({
+          icon: "success",
+          title: response.data.message,
+        });
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+};
+
+export const editSelectedStudent = (store, id) => {
+  store.commit("EDIT_SELECTED_STUDENT", id);
+};
+
+// LOGINS
+
+export const checklink = (store, link) => {
+  return axios({
+    method: "post",
+    url: state.api_url + "checklink",
+    data: {
+      link: link,
+    },
+  });
+};
+
+export const checkSecret = (store, data) => {
+  return axios({
+    method: "post",
+    url: state.api_url + "check",
+    data: {
+      link: data.link,
+      secret: data.code,
+    },
+  });
+};
+
+export const editCredentials = (store, data) => {
+  return axios({
+    method: "post",
+    url: state.api_url + "edit-credentials",
+    data: {
+      email: data.email,
+      password: data.password,
+      link: data.link,
+    },
+  });
 };

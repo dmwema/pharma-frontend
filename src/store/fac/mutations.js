@@ -55,6 +55,12 @@ export const EDIT_SELECTED_PROF = (state, id) => {
   state.selectedProf = state.professors.find((prof) => prof.id === id);
 };
 
+export const EDIT_SELECTED_LOGIN_PROF = (state, prof) => {
+  state.selectedLoginProf = {
+    fullname: prof.lastname + " " + prof.middlename + " " + prof.firstname,
+  };
+};
+
 // COURSE
 
 export const GET_COURSES = (state, courses) => {
@@ -111,4 +117,44 @@ export const GET_JURY = (state, jury) => {
   });
 
   state.jury = storeJury;
+};
+
+// STUDENT
+
+export const ADD_STUDENT = (state, student) => {
+  let storeStudent = {
+    fullname:
+      student.lastname + " " + student.middlename + " " + student.firstname,
+    email: student.email,
+    sexe: student.sexe,
+  };
+  state.professors.push(storeProf);
+};
+
+export const GET_STUDENTS = (state, students) => {
+  state.students = [];
+  let i = 0;
+  students.forEach((student) => {
+    state.students.push({
+      key: ++i,
+      id: student.id,
+      fullname:
+        student.lastname + " " + student.middlename + " " + student.firstname,
+      sexe: student.gender,
+      email: student.email,
+      has_logins: student.has_logins,
+    });
+  });
+};
+
+export const EDIT_SELECTED_STUDENT = (state, id) => {
+  state.selectedStudent = state.students.find((student) => student.id === id);
+};
+
+export const VALID_LINK = (state) => {
+  state.validProfLink = true;
+};
+
+export const UNVALID_LINK = (state) => {
+  state.validProfLink = false;
 };

@@ -15,3 +15,14 @@ export const selectedCourse = (state) => state.selectedCourse;
 // JURY
 
 export const jury = (state) => state.jury;
+
+// STUDENTS
+
+export const students = (state) => state.students;
+
+export const selectedStudent = (state) => state.selectedStudent;
+
+// PROF LOGIN
+
+export const validLink = (state) => state.validProfLink;
+export const selectedLoginProf = (state) => state.selectedLoginProf;

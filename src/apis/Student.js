@@ -2,7 +2,7 @@ import Api from "./Api";
 
 export default {
   all() {
-    return Api.get("student");
+    return Api.get("students/1");
   },
 
   update(student) {
@@ -12,11 +12,12 @@ export default {
       lastname: student.lastname,
       email: student.email,
       gender: student.sexe,
+      promotion_id: 1,
     });
   },
 
   delete(id) {
-    return Api.post("delete-student", { id: id });
+    return Api.post("delete-student", { id: id, promotion_id: 1 });
   },
 
   add(data) {
@@ -25,7 +26,8 @@ export default {
       lastname: data.lastname,
       middlename: data.middlename,
       email: data.email,
-      gender: data.sexe,
+      sexe: data.sexe,
+      promotion_id: 1,
     });
   },
 };
