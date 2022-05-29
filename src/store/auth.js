@@ -21,11 +21,11 @@ export default {
   },
 
   getters: {
-    authentificated() {
+    authentificated(state) {
       return state.user && state.token;
     },
 
-    user() {
+    user(state) {
       return state.user;
     },
   },
@@ -46,17 +46,23 @@ export default {
     },
 
     async attempt(store, token) {
-      store.commit("SET_TOKEN", token);
+      if (token) {
+        store.commit("SET_TOKEN", token);
+      }
+
+      if (!store.state.token) {
+        return;
+      }
+
       axios({
         method: "get",
         url: rootState.api_url + "auth/me",
-        headers: {
-          Authorization: "Bearer " + token,
-        },
       })
         .then((response) => {
           store.commit("SET_USER", response.data);
-          router.push({ name: "DashboardsTeacher" });
+          if (router.currentRoute.name !== "DashboardsTeacher") {
+            router.push({ name: "DashboardsTeacher" });
+          }
         })
         .catch((err) => {
           console.log(err);

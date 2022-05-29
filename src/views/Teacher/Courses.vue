@@ -41,7 +41,7 @@
 
 <script>
 	
-	import axios from 'axios';
+	import Vuex from 'vuex'
 
 	// Second table's list of columns.
 	const columns2 = [
@@ -77,9 +77,6 @@
 
 				// Second table's list of columns.
 				columns2,
-	
-				// Second table's list of rows.
-				data2,
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -124,11 +121,14 @@
 			},
 			
 		},
-		mounted() {
-			axios
-				.get('http://localhost:8080/teacher/courses/11')
-				.then(response => (this.data2 = response.data))
+		computed: {
+			...Vuex.mapGetters({
+				data2: 'getCourses',
+			}),
 		},
+		mounted() {
+			this.$store.dispatch('profCourses')
+		}
 	}
 
 </script>

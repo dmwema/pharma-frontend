@@ -13,6 +13,8 @@ export default {
 
   promotions: [],
 
+  selectedPromotion: null,
+
   selectedProf: {
     id: "",
     key: "",

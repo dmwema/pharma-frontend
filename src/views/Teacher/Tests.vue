@@ -80,6 +80,13 @@
 					]" 
 					placeholder="Description" />
 				</a-form-item>
+
+				<a-form-item class="mb-10" label="Côte maximale" :colon="false">
+					<a-input type="number" v-decorator="[
+						'max',
+					]" 
+					placeholder="Max" />
+				</a-form-item>
 					
 			</a-form>
         </a-modal>	
@@ -89,14 +96,15 @@
 </template>
 
 <script>
-	import axios from 'axios';
 	let momentjs = require('moment');
+	import Vuex from 'vuex'
+	import axios from 'axios'
 
 	// Table columns
 	const columns = [
 		{
 			title: 'ID',
-			dataIndex: 'id',
+			dataIndex: 'key',
 			sorter: (a, b) => a.id - b.id,
 			sortDirections: ['descend', 'ascend'],
 			scopedSlots: { customRender: 'id' },
@@ -123,145 +131,18 @@
 			scopedSlots: { customRender: 'description' },
 		},
 		{
+			title: 'MAX',
+			dataIndex: 'max',
+			sorter: (a, b) => a.max.length - b.max.length,
+			sortDirections: ['descend', 'ascend'],
+			scopedSlots: { customRender: 'max' },
+		},
+		{
 			title: '',
-			dataIndex: 'actions',
+			dataIndex: 'id',
 			scopedSlots: { customRender: 'actions' },
 		},
 	];
-
-	// Table rows
-	const data = [
-		{
-			"key": 10421,
-			"date": "1 Nov, 10:20 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Orlando Imieto",
-				"avatar": "images/team-2.jpg",
-			},
-			"product": "Nike Sport V2",
-			"revenue": "140.20",
-		},
-		{
-			"key": 10422,
-			"date": "1 Nov, 10:53 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Alice Murinho",
-				"avatar": "images/team-1.jpg",
-			},
-			"product": "Valvet T-shirt",
-			"revenue": "42.00",
-		},
-		{
-			"key": 10423,
-			"date": "1 Nov, 11:13 AM",
-			"status": "Refunded",
-			"customer": {
-				"name": "Michael Mirra",
-			},
-			"product": "Leather Wallet",
-			"extra": "+1 more",
-			"revenue": "25.50",
-		},
-		{
-			"key": 10424,
-			"date": "1 Nov, 12:20 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Andrew Nichel",
-				"avatar": "images/team-3.jpg",
-			},
-			"product": "Bracelet Onu-Lino",
-			"revenue": "19.40",
-		},
-		{
-			"key": 10425,
-			"date": "1 Nov, 1:40 PM",
-			"status": "Canceled",
-			"customer": {
-				"name": "Sebastian Koga",
-				"avatar": "images/team-4.jpg",
-			},
-			"product": "Phone Case Pink",
-			"extra": "x 2",
-			"revenue": "44.90",
-		},
-		{
-			"key": 10426,
-			"date": "1 Nov, 2:19 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Laur Gilbert",
-			},
-			"product": "Backpack Niver",
-			"revenue": "112.50",
-		},
-		{
-			"key": 10427,
-			"date": "1 Nov, 3:42 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Iryna Innda",
-			},
-			"product": "Adidas Vio",
-			"revenue": "200.00",
-		},
-		{
-			"key": 10428,
-			"date": "2 Nov, 9:32 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Arrias Liunda",
-			},
-			"product": "Airpods 2 Gen",
-			"revenue": "350.00",
-		},
-		{
-			"key": 10429,
-			"date": "2 Nov, 10:14 AM",
-			"status": "Paid",
-			"customer": {
-				"name": "Rugna Ilpio",
-				"avatar": "images/team-5.jpg",
-			},
-			"product": "Bracelet Warret",
-			"revenue": "15.00",
-		},
-		{
-			"key": 10430,
-			"date": "2 Nov, 12:56 PM",
-			"status": "Refunded",
-			"customer": {
-				"name": "Anna Landa",
-				"avatar": "images/ivana-squares.jpg",
-			},
-			"product": "Watter Bottle India",
-			"extra": "x 3",
-			"revenue": "25.00",
-		},
-		{
-			"key": 10431,
-			"date": "2 Nov, 3:12 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Karl Innas",
-			},
-			"product": "Kitchen Gadgets",
-			"revenue": "164.90",
-		},
-		{
-			"key": 10432,
-			"date": "2 Nov, 5:12 PM",
-			"status": "Paid",
-			"customer": {
-				"name": "Oana Kilas",
-			},
-			"product": "Office Papers",
-			"revenue": "23.90",
-		},
-	];
-
 	export default {
 		components: {
 		},
@@ -271,12 +152,9 @@
 				current_course: null,
 
 				moment: momentjs,
-				
+
 				// Table columns
 				columns,
-				
-				// Table rows
-				data,
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -297,13 +175,16 @@
 				// Table's selected rows
       			selectedRowKeys: [],
 
-				courses: [],
-
 			}
 		},
 		methods: {
+
+			...Vuex.mapActions({
+				addTest: 'addTest',
+				editSelectedCourse: 'editSelectedCourse',
+				deleteTest: 'deleteTest',
+			}),
 			deleteRow(id) {
-				console.log(id)
 				this.$swal.fire({
 					title: "Êtes-vous sûre ?",
 					text: "Une fois supprimée, vous n'allez plus récuperer cette information",
@@ -315,34 +196,7 @@
 					dangerMode: true,
 				}).then((result) => {
 				if (result.isDenied) {
-					axios({
-							method: 'delete',
-							url: 'http://localhost:8080/teacher/work',
-							data: {
-								title: values.title,
-								description: values.description,
-								date: values.date,
-								course_id: this.current_course,
-							}
-						})
-						.then((response) => {
-							if (response.data.success) {
-								Toast.fire({
-								icon: 'success',
-								title: response.data.message
-							})
-							} else {
-								Toast.fire({
-									icon: 'success',
-									title: response.data.message
-								})
-							}
-						}).catch(err => console.log(err))
-
-					Toast.fire({
-						icon: 'success',
-						title: 'Épreuve supprimée avec succès'
-					})
+					this.deleteTest(id)
 				}
 				})
 			},
@@ -396,43 +250,9 @@
 				
 				this.visible = false;
 
-				const Toast = this.$swal.mixin({
-					toast: true,
-					position: 'top-end',
-					showConfirmButton: false,
-					timer: 2000,
-					timerProgressBar: false,
-					didOpen: (toast) => {
-						toast.addEventListener('mouseenter', this.$swal.stopTimer)
-						toast.addEventListener('mouseleave', this.$swal.resumeTimer)
-					}
-				})
-
 				this.form.validateFields((err, values) => {
 					if ( !err ) {
-						axios({
-							method: 'post',
-							url: 'http://localhost:8080/teacher/work',
-							data: {
-								title: values.title,
-								description: values.description,
-								date: values.date,
-								course_id: this.current_course,
-							}
-						})
-						.then((response) => {
-							if (response.data.success) {
-								Toast.fire({
-								icon: 'success',
-								title: response.data.message
-							})
-							} else {
-								Toast.fire({
-									icon: 'success',
-									title: response.data.message
-								})
-							}
-						}).catch(err => console.log(err))
+						this.addTest(values)
 					}
 				});
 			},
@@ -454,18 +274,20 @@
 			},
 
 			create_test(id) {
+				this.editSelectedCourse(id)
 				this.current_course = id
 				this.showModal();
 			}
 						
 		},
+		computed: {
+			...Vuex.mapGetters({
+				profSelectedCourse: 'profSelectedCourse',
+				courses: 'tests',
+			}),
+		},
 		mounted() {
-			axios
-				.get('http://localhost:8080/teacher/works/11')
-				.then((response) => {
-					this.courses = response.data
-				})
-				.catch(err => console.log(err))
+			this.$store.dispatch('profTests')
 		},
 	}
 </script>

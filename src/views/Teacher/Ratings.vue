@@ -7,157 +7,129 @@
 
 	<div>
         <a-tabs default-active-key="1" @change="callback">
-            <a-tab-pane key="1" tab="Mathématique">
-                <!-- Searchable Datatable card -->
-                <a-card :bordered="false" class="header-solid mb-24" :bodyStyle="{padding: 0, paddingTop: '16px'}">
-                    <template #title>
-                        <h5 class="font-semibold">Première Intérrogation / <small>20 Juillet 20222</small></h5>
-						
-						<!-- Test List header -->
-						<a-row type="flex" :gutter="24">
-							<a-col :span="12">
-		               			<a-button type="success" @click="showModal"><a-icon type="file-excel" theme="outlined" />IMPORTER VIA EXCEL</a-button>
-							</a-col>
-							<a-col :span="12" class="mb-24 text-right">
-							<a-button @click="csvExport(csvData)" class="ml-15">
-								<i class="ni ni-archive-2 mr-5"></i> EXPORTER EN .XLS
-							</a-button>
-						</a-col>
-						</a-row>
-					</template>
-                    <div class="mx-25">
-                        <a-row type="flex" :gutter="24">
-                            <a-col :span="24" :md="12">
-                                <a-select v-model="pageSize2" @change="onPageSize2Change" style="width: 70px">
-                                    <a-select-option value="5">5</a-select-option>
-                                    <a-select-option value="10">10</a-select-option>
-                                    <a-select-option value="15">15</a-select-option>
-                                    <a-select-option value="20">20</a-select-option>
-                                    <a-select-option value="25">25</a-select-option>
-                                </a-select>
-                                <label for="" class="ml-10">entries per page</label>
-                            </a-col>
-                            <a-col :span="24" :md="12" class="text-right">
-                                <a-input-search placeholder="input search text" style="max-width: 200px;" v-model="query" @change="onSearchChange"/>
-                            </a-col>
-                        </a-row>
-                    </div>
-                    
-                    <a-table class="mt-20" :columns="columns2" :data-source="data2" :pagination="{pageSize: pageSize2,}">
+            <a-tab-pane v-for="course in courses" :key="course.id" :tab="course.title">
+				<a-tabs default-active-key="1" @change="callback">
+            		<a-tab-pane v-for="work in course.annual_works" :key="work.id" :tab="work.title">
+						<!-- Test List card -->
+						<a-card :bordered="true" class="header-solid mb-24" :bodyStyle="{padding: 0, paddingTop: '16px'}">
+							<template #title>
+								<h5 class="font-semibold">{{ work.title }} / <small>{{ work.date_work }}</small></h5>
+							</template>					<!-- Table search -->
+							<div class="mx-25">
+								<a-row type="flex" :gutter="24">
+									<a-col :span="24" class="text-right">
+										<a-input-search placeholder="Rechercher" style="max-width: 200px;" v-model="query" @change="onSearchChange" />
+									</a-col>
+								</a-row>
+							</div>
+					<!-- / Table search -->
+					
+					<!-- Test table -->
+					<a-table class="mt-20"
+						:columns="columns"
+						:data-source="work.students"
+						:pagination="{pageSize: pageSize,}"
+					>
+
+						<template slot="date_work" slot-scope="date_work">{{ moment(date_work).format("D MMM YYYY") }}</template>
+
 						<template slot="cote" slot-scope="cote">
-							<a-input placeholder="0" min="0" max="20" type="number" :value="cote" style="width:42px"/>	
-						</template>	
+							<a-input class="cote_input"
+							type="number" placeholder="" @change="ShowSaveBtn(cote)" min="0" :value="getSingleCote(cote)"/>
+
+
+							<a-button v-if="saveBtn[cote]" @click="updateCote({cote})" icon="save" type="primary" class="btn-status border-primary">
+							</a-button>	
+						</template>
+
+
 					</a-table>
-                </a-card>
-                <!-- / Searchable Datatable card -->
+					<!-- / Orders table -->
+
+				</a-card>
+				<!-- / Test List card -->
             </a-tab-pane>
-            <a-tab-pane key="2" tab="Informatique" force-render>
-                Content of Tab Pane 2
-            </a-tab-pane>
-            <a-tab-pane key="3" tab="Bilogie Animale">
-                Content of Tab Pane 3
+        </a-tabs>
             </a-tab-pane>
         </a-tabs>
         
-        <a-modal v-model="visible" title="Basic Modal" @ok="handleOk">
-            <a-form :form="form" @submit="handleSubmit">
-				<a-form-item label="Epreuve">
-					<a-select
-						v-decorator="[
-						'course',
-						{ rules: [{ required: true, message: 'Veuillez choisir une épreuve!' }] },
-						]"
-						placeholder="Selectionnez une épreuve ici"
-						@change="handleSelectChange"
-					>
-						<a-select-option value="mathematiques">
-						Mathématiques
-						</a-select-option>
-						<a-select-option value="info">
-						Informatique
-						</a-select-option>
-					</a-select>
+        <a-modal v-model="visible" title="Enrégistrer une épreuve" @ok="handleOk">
+            <a-form :form="form">
+
+				<a-form-item class="mb-10" label="Date" :colon="false">
+					<a-input v-decorator="[
+							'date',
+							{ rules: [{ required: true, message: 'Vous devez entrer une date' }] },
+					]"
+					type="date" placeholder="Date de l'épreuve" />
 				</a-form-item>
-				<a-upload-dragger
-					name="file"
-					:multiple="false"
-					action="google.com"
-					@change="handleChange"
-				>
-					<p class="ant-upload-drag-icon">
-					<a-icon type="inbox" />
-					</p>
-					<p class="ant-upload-text">
-					Cliquez ou glissez et deposez un fichier ici
-					</p>
-					<p class="ant-upload-hint">
-					Support for a single or bulk upload. Strictly prohibit from uploading company data or other
-					band files
-					</p>
-				</a-upload-dragger>
-	
-				<a-form-item :wrapper-col="{ span: 12, offset: 5 }">
-				
+
+				<a-form-item class="mb-10" label="Donnez un titre à l'épreuve" :colon="false">
+					<a-input v-decorator="[
+							'title',
+							{ rules: [{ required: true, message: 'Vous devez entrer un intitulé' }] },
+					]" 
+					placeholder="Intitulé" />
 				</a-form-item>
+
+				<a-form-item class="mb-10" label="Donnez une description de l'épreuve" :colon="false">
+					<a-input v-decorator="[
+						'description',
+						{ rules: [{ required: true, message: 'Vous devez entrer une description' }] },
+					]" 
+					placeholder="Description" />
+				</a-form-item>
+					
 			</a-form>
-        </a-modal>
+        </a-modal>	
 		
 	</div>
 
 </template>
 
 <script>
+	let momentjs = require('moment');
+	import Vuex from 'vuex'
+	import Vue from 'vue'
 
-	// Second table's list of columns.
-	const columns2 = [
+	// Table columns
+	const columns = [
 		{
-			title: '#',
+			title: 'ID',
 			dataIndex: 'id',
 			sorter: (a, b) => a.id - b.id,
 			sortDirections: ['descend', 'ascend'],
+			scopedSlots: { customRender: 'id' },
 		},
 		{
 			title: 'ETUDIANT',
-			dataIndex: 'name',
-			sorter: (a, b) => a.name.length - b.name.length,
+			dataIndex: 'names',
+			sorter: (a, b) => a.names - b.names,
 			sortDirections: ['descend', 'ascend'],
+			scopedSlots: { customRender: 'student' },
 		},
 		{
-			title: 'MAX / 20',
-			dataIndex: 'ponderation',
+			title: 'COTE',
+			dataIndex: 'cote',
+			sorter: (a, b) => a.cote.length - b.cote.length,
 			sortDirections: ['descend', 'ascend'],
-			sorter: (a, b) => a.ponderation - b.ponderation,
 			scopedSlots: { customRender: 'cote' },
-		}
-	];
-	
-	// Second table's list of rows.
-	const data2 = [
-		{
-			key: 1,
-			id: 1,
-			name: "Jhon Doe",
-			ponderation: 4,
 		},
-		{
-			key: 2,
-			id: 2,
-			name: "Jhon Doe",
-			ponderation: 6,
-		}
-	] ;
-
+	];
 	export default {
 		components: {
 		},
 		data() {
 			return {
 
-				// Second table's list of columns.
-				columns2,
-	
-				// Second table's list of rows.
-				data2,
+				current_course: null,
+
+				moment: momentjs,
+
+				// Table columns
+				columns,
+
+				saveBtn: [],
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -175,24 +147,43 @@
       			
 				form: this.$form.createForm(this, { name: 'coordinated' }),
 
+				// Table's selected rows
+      			selectedRowKeys: [],
+
 			}
 		},
 		methods: {
 
-			// Event handler for first table's size change.
-			onPageSizeChange() {
-				this.pageSize = parseInt( this.pageSize ) ;
+			...Vuex.mapActions({
+				addTest: 'addTest',
+				editSelectedCourse: 'editSelectedCourse',
+				deleteTest: 'deleteTest',
+			}),
+			deleteRow(id) {
+				this.$swal.fire({
+					title: "Êtes-vous sûre ?",
+					text: "Une fois supprimée, vous n'allez plus récuperer cette information",
+					icon: "warning",
+					showDenyButton: true,
+				  	denyButtonText: `Supprimer`,
+					confirmButtonText: 'Annuler',
+  					focusConfirm: false,
+					dangerMode: true,
+				}).then((result) => {
+				if (result.isDenied) {
+					this.deleteTest(id)
+				}
+				})
 			},
-
-			// Event handler for second table's size change.
-			onPageSize2Change() {
-				this.pageSize2 = parseInt( this.pageSize2 ) ;
+			ShowSaveBtn(id) {
+				Vue.set(this.saveBtn, id, true)
+				
+				console.log(this.saveBtn[5])
 			},
-
-			// Event handler for second table's search.
+			// Event listener for input change on table search field.
 			onSearchChange() {
 				if( this.query.length > 0 ) {
-					this.data2 = data2.filter( (row) => {
+					this.data = data.filter( (row) => {
 						for( const key in row ) {
 							if( row[ key ]
 								.toString()
@@ -204,15 +195,46 @@
 					}) ;
 				}
 				else {
-					this.data2 = data2 ;
+					this.data = data ;
 				}
+			},
+
+			// Event listener for table row selection change.
+			onSelectChange(selectedRowKeys) {
+				this.selectedRowKeys = selectedRowKeys;
+			},
+
+			// Event handler for first table's size change.
+			onPageSizeChange() {
+				this.pageSize = parseInt( this.pageSize ) ;
+			},
+
+			// Event handler for second table's size change.
+			onPageSize2Change() {
+				this.pageSize2 = parseInt( this.pageSize2 ) ;
+
 			},
 			showModal() {
 				this.visible = true;
 			},
+
+			handleSelectChange() {
+				console.log('changed')
+			},
+
+			showEditModal() {
+				this.visible = true;
+			},
 			handleOk(e) {
-				console.log(e);
+				e.preventDefault();
+				
 				this.visible = false;
+
+				this.form.validateFields((err, values) => {
+					if ( !err ) {
+						this.addTest(values)
+					}
+				});
 			},
 			
 			handleChange(info) {
@@ -231,37 +253,52 @@
 				console.log(key);
 			},
 
-			handleSubmit(e) {
-				e.preventDefault();
-				this.form.validateFields((err, values) => {
-					if (!err) {
-					console.log('Received values of form: ', values);
-					}
-				});
-			},
-			
-			handleSelectChange(value) {
-				console.log(value);
-				this.form.setFieldsValue({
-					note: `Hi, ${value === 'male' ? 'man' : 'lady'}!`,
-				});
-			},
+			create_test(id) {
+				this.editSelectedCourse(id)
+				this.current_course = id
+				this.showModal();
+			}
 						
 		},
+		watch: {
+			studCote(id) {
+				console.log(id)
+				//getSingleCote(cote)
+			}
+		},
+		computed: {
+			...Vuex.mapGetters({
+				profSelectedCourse: 'profSelectedCourse',
+				courses: 'tests',
+				cotes: 'cotes',
+				getSingleCote: 'getSingleCote'
+			}),
+		},
+		mounted() {
+			this.$store.dispatch('profTests', 1)
+			this.$store.dispatch('getCotes')
+		},
 	}
-
 </script>
 
 <style lang="scss">
-	/* Chrome, Safari, Edge, Opera */
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-	}
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+    text-align: right;
+	margin-right: 10px;
+}
 
-	/* Firefox */
-	input[type=number] {
-	-moz-appearance: textfield;
-	}
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+    text-align: right;
+	margin-right: 10px;
+}
+
+.cote_input {
+	width: 70px
+}
 </style>

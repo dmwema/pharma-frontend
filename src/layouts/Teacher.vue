@@ -135,7 +135,7 @@
 			// Sets layout's element's class based on route's meta data.
 			layoutClass() {
 				return this.$route.meta.layoutClass ;
-			}
+			},
 		},
 	})
 

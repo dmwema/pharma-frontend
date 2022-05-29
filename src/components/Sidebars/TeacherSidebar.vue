@@ -15,7 +15,7 @@
 		:style="{ backgroundColor: 'transparent',}">
 			<div class="brand"><img src="images/logo-ct-black.png" alt="">
 				<span>Fac Pharmacie</span><br>
-				<b>Prof. Daniel MWEMA</b>
+				<b>Professeur {{ user.professor.firstname + " " + user.professor.lastname }}</b>
 			</div>
 			<hr>
 
@@ -43,12 +43,12 @@
 						<span class="label">Cours</span>
 					</span>
 					<a-menu-item-group>
-						<a-menu-item>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id"> 
 							<router-link to="/t/courses">
-								<span class="label">G1 Informatique</span>
+								<span class="label">{{ promotion.name }}</span>
 							</router-link>
 						</a-menu-item>
-						</a-menu-item-group>
+					</a-menu-item-group>
 				</a-sub-menu>
 
 				<a-sub-menu key="tests" style="padding: 0;">
@@ -58,13 +58,13 @@
 						</span>
 						<span class="label">Epreuves</span>
 					</span>
-					<a-menu-item-group>
-						<a-menu-item>
+					<a-menu-item-group>						
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id"> 
 							<router-link to="/t/epreuves">
-								<span class="label">G1 Informatique</span>
+								<span class="label">{{ promotion.name }}</span>
 							</router-link>
 						</a-menu-item>
-						</a-menu-item-group>
+					</a-menu-item-group>
 				</a-sub-menu>
 
 				<a-sub-menu key="ratings" style="padding: 0;">
@@ -75,12 +75,12 @@
 						<span class="label">Cotes</span>
 					</span>
 					<a-menu-item-group>
-						<a-menu-item>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id"> 
 							<router-link to="/t/ratings">
-								<span class="label">G1 Informatique</span>
+								<span class="label">{{ promotion.name }}</span>
 							</router-link>
 						</a-menu-item>
-						</a-menu-item-group>
+					</a-menu-item-group>
 				</a-sub-menu>	
 			</a-menu>
 			<!-- / Sidebar Navigation Menu -->
@@ -107,6 +107,7 @@
 </template>
 
 <script>
+	import Vuex from 'vuex'
 
 	export default ({
 		props: {
@@ -154,6 +155,17 @@
 				}
 			},
 		},
+
+		computed: {
+			...Vuex.mapGetters({
+				user: 'auth/user',
+				promotions: 'promotions',
+			}),
+		},
+
+		created() {
+    		this.$store.dispatch('getPromotions')
+		}
 	})
 
 </script>

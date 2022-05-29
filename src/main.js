@@ -1,6 +1,7 @@
 // VueJS
 import Vue from "vue";
-import store from "./store/fac/index";
+
+require("./store/subscriber");
 
 // Ant Design Vue
 import Antd from "ant-design-vue";
@@ -39,14 +40,18 @@ import router from "./router";
 // App Styling
 import "./scss/app.scss";
 
+import store from "./store/fac";
+
 Vue.config.productionTip = false;
 
 //event bus
 Vue.prototype.$eventHub = new Vue(); // Global event bus
 
-// Initialize Vue
-new Vue({
-  router,
-  render: (h) => h(App),
-  store,
-}).$mount("#app");
+store.dispatch("auth/attempt", localStorage.getItem("token")).then(() => {
+  // Initialize Vue
+  new Vue({
+    router,
+    render: (h) => h(App),
+    store,
+  }).$mount("#app");
+});

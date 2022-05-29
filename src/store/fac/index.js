@@ -2,6 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import auth from "../auth";
 import loader from "../loader";
+import prof from "../prof";
 
 Vue.use(Vuex);
 
@@ -16,7 +17,7 @@ let store = new Vuex.Store({
   getters: getters,
   actions: actions,
   strict: true,
-  modules: { auth, loader },
+  modules: { auth, loader, prof },
 });
 
 global.store = store;

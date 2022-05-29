@@ -1,3 +1,5 @@
+import auth from "../store/auth";
+
 import Api from "./Api";
 
 export default {
@@ -26,5 +28,10 @@ export default {
 
   delete(id) {
     return Api.post("delete-course", { id: id });
+  },
+
+  getProfCourses() {
+    let prof_id = auth.state.user.professor.id;
+    return Api.get("teacher/courses/" + prof_id, { teacher_id: prof_id });
   },
 };

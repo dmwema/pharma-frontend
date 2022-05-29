@@ -1,5 +1,6 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import store from "../store/fac";
 
 Vue.use(VueRouter);
 
@@ -25,6 +26,15 @@ let routes = [
       breadcrumbs: ["Dashboards", "Teacher"],
     },
     component: () => import("../views/Dashboards/Teacher.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
   },
   {
     path: "/t/deliberation",
@@ -36,6 +46,15 @@ let routes = [
       breadcrumbs: ["Dashboards", "Deliberation"],
     },
     component: () => import("../views/Teacher/Deliberation.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
   },
   {
     path: "/t/courses",
@@ -48,6 +67,15 @@ let routes = [
       breadcrumbs: ["Pages", "Teacher", "Courses"],
     },
     component: () => import("../views/Teacher/Courses.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
   },
   {
     path: "/t/epreuves",
@@ -60,6 +88,15 @@ let routes = [
       breadcrumbs: ["Pages", "Teacher", "Tests"],
     },
     component: () => import("../views/Teacher/Tests.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
   },
   {
     path: "/t/ratings",
@@ -72,6 +109,15 @@ let routes = [
       breadcrumbs: ["Pages", "Teacher", "Ratings"],
     },
     component: () => import("../views/Teacher/Ratings.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
   },
   {
     path: "/f/dashboards/",
@@ -383,7 +429,7 @@ let routes = [
   },
   {
     path: "/login",
-    name: "Illustration Sign Up",
+    name: "LoginPage",
     layout: "default",
     meta: {
       layoutClass: "layout-sign-up-illustration",
