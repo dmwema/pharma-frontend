@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import auth from "../auth";
 import loader from "../loader";
 import prof from "../prof";
+import juryStore from "../jury";
 
 Vue.use(Vuex);
 
@@ -17,7 +18,7 @@ let store = new Vuex.Store({
   getters: getters,
   actions: actions,
   strict: true,
-  modules: { auth, loader, prof },
+  modules: { auth, loader, prof, juryStore },
 });
 
 global.store = store;

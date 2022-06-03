@@ -6,14 +6,16 @@
 <template>
 
 	<div>
-        <a-tabs default-active-key="1" @change="callback">
+        <a-tabs>
             <a-tab-pane v-for="course in courses" :key="course.id" :tab="course.title">
-				<a-tabs default-active-key="1" @change="callback">
+				<a-tabs @change="callback">
             		<a-tab-pane v-for="work in course.annual_works" :key="work.id" :tab="work.title">
 						<!-- Test List card -->
 						<a-card :bordered="true" class="header-solid mb-24" :bodyStyle="{padding: 0, paddingTop: '16px'}">
 							<template #title>
 								<h5 class="font-semibold">{{ work.title }} / <small>{{ work.date_work }}</small></h5>
+								<div style="width:100%; height:1px; background-color:#F1F1F1"></div>
+								<h5 class="font-semibold" style="color:#1890FF"><small>Sur </small>{{ work.max }}</h5>
 							</template>					<!-- Table search -->
 							<div class="mx-25">
 								<a-row type="flex" :gutter="24">
@@ -21,6 +23,9 @@
 										<a-input-search placeholder="Rechercher" style="max-width: 200px;" v-model="query" @change="onSearchChange" />
 									</a-col>
 								</a-row>
+							<a-button v-if="hasChange" @click="updateCotes" icon="save" type="primary" class="btn-status border-primary mr-5">
+								Mettre à jour
+							</a-button>	
 							</div>
 					<!-- / Table search -->
 					
@@ -34,12 +39,8 @@
 						<template slot="date_work" slot-scope="date_work">{{ moment(date_work).format("D MMM YYYY") }}</template>
 
 						<template slot="cote" slot-scope="cote">
-							<a-input class="cote_input"
-							type="number" placeholder="" @change="ShowSaveBtn(cote)" min="0" :value="getSingleCote(cote)"/>
-
-
-							<a-button v-if="saveBtn[cote]" @click="updateCote({cote})" icon="save" type="primary" class="btn-status border-primary">
-							</a-button>	
+							<a-input class="cote_input" :class="updatedInputs[cote] ? 'border-red': ''"
+							type="number" @change="updatedInput(cote)" min="0" :max="work.max" v-model="inputCotes[cote]"/>
 						</template>
 
 
@@ -88,9 +89,10 @@
 </template>
 
 <script>
+	import Toast from "../../store/alert"
+
 	let momentjs = require('moment');
 	import Vuex from 'vuex'
-	import Vue from 'vue'
 
 	// Table columns
 	const columns = [
@@ -126,10 +128,22 @@
 
 				moment: momentjs,
 
+				updatedInputs: {},
+
+				inputCotes: {},
+
+				inputCotes: {
+					1: 1,
+					2: 2,
+					3: 3,
+					4: 4,
+					5: 5,
+					6: 6,
+				},
+
+				hasChange: false,
 				// Table columns
 				columns,
-
-				saveBtn: [],
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -153,11 +167,11 @@
 			}
 		},
 		methods: {
-
 			...Vuex.mapActions({
 				addTest: 'addTest',
 				editSelectedCourse: 'editSelectedCourse',
 				deleteTest: 'deleteTest',
+				updateStoreCotes: 'updateCotes',
 			}),
 			deleteRow(id) {
 				this.$swal.fire({
@@ -175,10 +189,31 @@
 				}
 				})
 			},
-			ShowSaveBtn(id) {
-				Vue.set(this.saveBtn, id, true)
+
+			updateCotes() {
+				let to_update = {}
 				
-				console.log(this.saveBtn[5])
+				this.cotes.forEach(cote => {
+					if (this.inputCotes[cote.id] !== cote.cote){
+						to_update['data_' + cote.id] = this.inputCotes[cote.id]
+					}
+				});
+
+				this.updateStoreCotes(to_update).then((response) => {
+					if (response.data.success) {
+						this.hasChange = false
+
+						Toast.fire({
+							icon: "success",
+							title: response.data.message,
+						});
+					}
+				})
+			},
+
+			updatedInput(cote) {
+				this.hasChange = true
+				this.updatedInputs[cote] = true
 			},
 			// Event listener for input change on table search field.
 			onSearchChange() {
@@ -225,6 +260,7 @@
 			showEditModal() {
 				this.visible = true;
 			},
+
 			handleOk(e) {
 				e.preventDefault();
 				
@@ -250,7 +286,7 @@
 			},
 			
 			callback(key) {
-				console.log(key);
+				//console.log(key);
 			},
 
 			create_test(id) {
@@ -260,24 +296,36 @@
 			}
 						
 		},
-		watch: {
-			studCote(id) {
-				console.log(id)
-				//getSingleCote(cote)
-			}
-		},
+		
 		computed: {
 			...Vuex.mapGetters({
 				profSelectedCourse: 'profSelectedCourse',
 				courses: 'tests',
 				cotes: 'cotes',
-				getSingleCote: 'getSingleCote'
-			}),
+				getSingleCote: 'getSingleCote',
+				coteObj: 'coteObj',
+			})
 		},
+
 		mounted() {
 			this.$store.dispatch('profTests', 1)
 			this.$store.dispatch('getCotes')
 		},
+
+		watch: {
+			coteObj(value) {
+				this.inputCotes = value
+			},
+
+			hasChange(value) {
+				if (!value) {
+					this.updatedInputs = {}
+				}
+			}, 
+			inputCotes(value) {
+				console.log(value)
+			}
+		}
 	}
 </script>
 
@@ -300,5 +348,10 @@ input[type=number] {
 
 .cote_input {
 	width: 70px
+}
+
+.cote_input.border-red {
+	width: 70px;
+	border: 1px solid #000;
 }
 </style>

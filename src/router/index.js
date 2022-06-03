@@ -37,7 +37,7 @@ let routes = [
     },
   },
   {
-    path: "/t/deliberation",
+    path: "/t/deliberation/:promotion_id",
     name: "DeliberationTeacher",
     layout: "teacher",
     meta: {
@@ -46,6 +46,26 @@ let routes = [
       breadcrumbs: ["Dashboards", "Deliberation"],
     },
     component: () => import("../views/Teacher/Deliberation.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
+  },
+  {
+    path: "/t/jury/:promotion_id/:professor_id",
+    name: "JuryTeacher",
+    layout: "teacher",
+    meta: {
+      title: "Jury",
+      sidebarMap: ["Jury"],
+      breadcrumbs: ["Dashboards", "Jury"],
+    },
+    component: () => import("../views/Teacher/Jury.vue"),
     beforeEnter: (to, from, next) => {
       if (!store.getters["auth/authentificated"]) {
         return next({

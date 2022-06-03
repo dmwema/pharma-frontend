@@ -85,20 +85,41 @@
 			</a-menu>
 			<!-- / Sidebar Navigation Menu -->
 			<hr>
-			
+
 			<!-- Sidebar Navigation Menu -->
 			<a-menu theme="light" mode="inline">
-				<a-menu-item>
-					<router-link to="/t/deliberation">
-
-					<a href="#" style="padding-left:0">
+				<a-sub-menu key="courses" style="padding: 0;">
+					<span slot="title">
 						<span class="icon">
-							<a-icon type="read" theme="filled" class="m-0" />
+							<a-icon type="appstore" theme="filled" class="m-0" />
 						</span>
 						<span class="label">Délibération</span>
-					</a>
-					</router-link>
-				</a-menu-item>
+					</span>
+					<a-menu-item-group>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id"> 
+							<router-link :to="'/t/deliberation/' + promotion.id">
+								<span class="label">{{ promotion.name }}</span>
+							</router-link>
+						</a-menu-item>
+					</a-menu-item-group>
+				</a-sub-menu>
+
+				<a-sub-menu key="tests" style="padding: 0;">
+					<span slot="title">
+						<span class="icon">
+							<a-icon type="appstore" theme="filled" class="m-0" />
+						</span>
+						<span class="label">Jury</span>
+					</span>
+					<a-menu-item-group>						
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id"> 
+							<router-link :to="'/t/jury/'+ promotion.id + '/' + user.professor.id">
+								<span class="label">{{ promotion.name }}</span>
+							</router-link>
+						</a-menu-item>
+					</a-menu-item-group>
+				</a-sub-menu>
+
 			</a-menu>
 			<!-- / Sidebar Navigation Menu -->
 	</a-layout-sider>

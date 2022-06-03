@@ -75,17 +75,30 @@ export default {
     getCourses(state) {
       return state.courses;
     },
+
     tests(state) {
       return state.tests;
     },
+
     profSelectedCourse(state) {
+      console.log(state);
       return state.selectedCourse;
     },
+
     cotes(state) {
       return state.cotes;
     },
 
+    coteObj(state) {
+      let ret = [];
+      state.cotes.forEach((cote) => {
+        ret[cote.id] = cote.cote;
+      });
+      return ret;
+    },
+
     getSingleCote: (state) => (id) => {
+      console.log();
       return state.cotes.find((row) => row.id === id).cote;
     },
   },
@@ -167,6 +180,9 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+    updateCotes(state, data) {
+      return Cote.update(data);
     },
   },
 };
