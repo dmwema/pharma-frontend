@@ -28,4 +28,8 @@ export default {
       deliberation_id: deliberation_id,
     });
   },
+
+  getCotes(data) {
+    return data;
+  },
 };

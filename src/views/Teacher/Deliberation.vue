@@ -22,12 +22,12 @@
                                 </div>
                                 <a-collapse v-model="activeKey">
                                     <a-collapse-panel key="1" header="Cotes annuels">
-										<a-checkbox @change="change2" v-model="annualCoteChecks[course.id][work.id]" v-for="work in course.annual_works" :key="work.id">
+										<a-checkbox class="azeazeaze" v-model="annualCoteChecks[work.id]" v-for="work in course.annual_works" :key="work.id">
                                             {{ work.title }}
                                         </a-checkbox>
                                     </a-collapse-panel>
                                     <a-collapse-panel key="2" header="Cotes examen" :disabled="false">
-                                        <a-checkbox v-model="examCoteChecks[course.id][work.id]" v-for="work in course.annual_works" :key="work.id">
+                                        <a-checkbox v-model="examCoteChecks[work.id]" v-for="work in course.annual_works" :key="work.id">
                                             {{ work.title }}
                                         </a-checkbox>
                                     </a-collapse-panel>
@@ -181,17 +181,8 @@
 				})
 			},
 
-			change2() {
-				
-			},
-
 			sendCotes () {
-
-				this.formAnnual.validateFields((err, values) => {
-					if ( !err ) {
-						console.log(values)
-					}
-				});
+				console.log({'annual': this.annualCoteChecks, 'exam': this.examCoteChecks})
 			},
 
 			updateCotes() {
@@ -300,15 +291,11 @@
 
 		watch: {
 			courses (value) {
-				console.log(value)
 				if (value !== undefined) {
 					value.forEach(course => {
-						this.annualCoteChecks[course.id] = {}
-						this.examCoteChecks[course.id] = {}
 						course.annual_works.forEach(work => {
-							this.annualCoteChecks[course.id][work.id] = false
-
-							this.examCoteChecks[course.id][work.id] = false
+							this.annualCoteChecks[work.id] = false
+							this.examCoteChecks[work.id] = false
 						});
 					});
 				}

@@ -36,6 +36,7 @@
 							</svg>
 							<span class="text-danger">SUPPRIMER</span>
 						</a-button>
+						<!--
 						<a-button type="link" size="small" @click="editD(deliberation.id, deliberation.published)">
 							<svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path class="fill-muted" d="M13.5858 3.58579C14.3668 2.80474 15.6332 2.80474 16.4142 3.58579C17.1953 4.36683 17.1953 5.63316 16.4142 6.41421L15.6213 7.20711L12.7929 4.37868L13.5858 3.58579Z" fill="#111827"/>
@@ -43,6 +44,7 @@
 							</svg>
 							<span class="text-dark">MODIFIER</span>
 						</a-button>
+						-->
 					</div>
 				</a-card>
 				</a-col>

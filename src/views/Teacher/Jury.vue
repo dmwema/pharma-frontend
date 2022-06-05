@@ -24,73 +24,9 @@
       <!-- / Invoices Column -->
     </a-row>
 
-
     <a-tabs default-active-key="1">
-      <a-tab-pane tab="Etat des Cotes" key="1">
-        <!-- Test List card -->
-        <a-card
-          :bordered="true"
-          class="header-solid mb-24"
-          :bodyStyle="{ padding: 0, paddingTop: '16px' }"
-        >
-          <!-- Table search -->
-          <div class="mx-25">
-            <a-row type="flex" :gutter="24">
-              <a-col :span="24" class="text-right">
-                <a-input-search
-                  placeholder="Rechercher"
-                  style="max-width: 200px"
-                />
-              </a-col>
-            </a-row>
-          </div>
-          <!-- / Table search -->
-        </a-card>
-        <!-- / Test List card -->
-      </a-tab-pane>
-      <a-tab-pane tab="Critères de délibération" key="2">
-        <!-- Test List card -->
-        <a-card
-          :bordered="true"
-          class="header-solid mb-24"
-          :bodyStyle="{ padding: 0, paddingTop: '16px' }"
-        >
-          <!-- Table search -->
-          <div class="mx-25">
-            <a-row type="flex" :gutter="24">
-              <a-col :span="24" class="text-right">
-                <a-input-search
-                  placeholder="Rechercher"
-                  style="max-width: 200px"
-                />
-              </a-col>
-            </a-row>
-          </div>
-          <!-- / Table search -->
-        </a-card>
-        <!-- / Test List card -->
-      </a-tab-pane>
-      <a-tab-pane tab="Discussions" key="3">
-        <!-- Test List card -->
-        <a-card
-          :bordered="true"
-          class="header-solid mb-24"
-          :bodyStyle="{ padding: 0, paddingTop: '16px' }"
-        >
-          <!-- Table search -->
-          <div class="mx-25">
-            <a-row type="flex" :gutter="24">
-              <a-col :span="24" class="text-right">
-                <a-input-search
-                  placeholder="Rechercher"
-                  style="max-width: 200px"
-                />
-              </a-col>
-            </a-row>
-          </div>
-          <!-- / Table search -->
-        </a-card>
-        <!-- / Test List card -->
+      <a-tab-pane v-for="deliberation in deliberations" :key="deliberation.id" :tab="deliberation.title">
+        
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -106,29 +42,40 @@ import CardInvoices from "../../components/Cards/CardInvoices";
 import CardBillingInfo from "../../components/Cards/CardBillingInfo";
 import CardTransactions from "../../components/Cards/CardTransactions";
 
-// Salary cards data
-const salaries = [
+
+const columns = [
   {
-    value: 2000,
-    prefix: "+$",
-    icon: `
-										<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">
-											<g id="bank" transform="translate(0.75 0.75)">
-												<path id="Shape" transform="translate(0.707 9.543)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"/>
-												<path id="Path" d="M10.25,0,20.5,9.19H0Z" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"/>
-												<path id="Path-2" data-name="Path" d="M0,.707H20.5" transform="translate(0 19.793)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="1.5"/>
-											</g>
-										</svg>`,
-    title: "Salary",
-    content: "Belong Interactive",
+    title: 'ID',
+    dataIndex: 'key',
+    sorter: (a, b) => a.id - b.id,
+    sortDirections: ['descend', 'ascend'],
+    scopedSlots: { customRender: 'id' },
   },
   {
-    value: 49000,
-    prefix: "+$",
-    icon: `
-										<img src="images/logos/paypal-logo-2.png" alt="">`,
-    title: "Paypal",
-    content: "Freelance Payment",
+    title: 'COURS',
+    dataIndex: 'course',
+    sorter: (a, b) => a.date_work - b.date_work,
+    sortDirections: ['descend', 'ascend'],
+    scopedSlots: { customRender: 'date_work' },
+  },
+  {
+    title: 'DÉJÀ DEPOSÉ',
+    dataIndex: 'has_sent',
+    sorter: (a, b) => a.title.length - b.title.length,
+    sortDirections: ['descend', 'ascend'],
+    scopedSlots: { customRender: 'title' },
+  },
+  {
+    title: 'DATE DU DEPOT',
+    dataIndex: 'date',
+    sorter: (a, b) => a.description.length - b.description.length,
+    sortDirections: ['descend', 'ascend'],
+    scopedSlots: { customRender: 'description' },
+  },
+  {
+    title: '',
+    dataIndex: 'id',
+    scopedSlots: { customRender: 'actions' },
   },
 ];
 
@@ -212,8 +159,6 @@ export default {
   },
   data() {
     return {
-      // Salary cards data
-      salaries,
 
       is_member: false,
 
@@ -245,11 +190,14 @@ export default {
       user: "auth/user",
       postToJury: "postToJury",
       juries: "jury",
+			deliberations: "deliberations",
     }),
   },
 
   mounted() {
     this.$store.dispatch("getJury");
+    this.$store.dispatch("getDeliberationCotes", {});
+		this.$store.dispatch("getDeliberations", this.$route.params.promotion_id);
   },
 };
 </script>

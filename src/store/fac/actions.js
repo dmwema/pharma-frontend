@@ -8,6 +8,7 @@ import Jury from "../../apis/Jury";
 import Student from "../../apis/Student";
 
 export const getProfs = (store) => {
+  console.log(store);
   Professor.all()
     .then(function (response) {
       store.commit("SET_PROFS", response.data);

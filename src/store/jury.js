@@ -1,6 +1,5 @@
 import rootState from "../store/fac/state";
 import Deliberation from "../apis/Deliberation";
-import store from "./fac";
 import Toast from "./alert";
 
 export default {
@@ -8,6 +7,7 @@ export default {
     postToJury: {},
     deliberations: [],
     selectedDeliberation: {},
+    deliberationCotes: [],
   },
 
   mutations: {
@@ -19,6 +19,10 @@ export default {
     },
 
     SET_SELECTED_DELIBERATION(state, id) {
+      state.deliberations.find((delib) => delib.id === id);
+    },
+
+    SET_DELIBERATION_COTES(state, id) {
       state.deliberations.find((delib) => delib.id === id);
     },
   },
@@ -36,6 +40,10 @@ export default {
           is_member: false,
         };
       });
+    },
+
+    deliberationCotes(state) {
+      return state.deliberationCotes;
     },
 
     deliberations(state) {
@@ -94,6 +102,10 @@ export default {
         .catch((err) => {
           console.log(err);
         });
+    },
+
+    getDeliberationCotes(store, values) {
+      Deliberation.getCotes(values);
     },
 
     editselectedDeliberation(store, id) {

@@ -56,7 +56,6 @@
         
         <a-modal v-model="visible" title="Enrégistrer une épreuve" @ok="handleOk">
             <a-form :form="form">
-
 				<a-form-item class="mb-10" label="Date" :colon="false">
 					<a-input v-decorator="[
 							'date',

@@ -3,7 +3,7 @@ export default {
 
   students: [],
 
-  api_url: "https://pharma-delib-api.herokuapp.com/api/",
+  api_url: "http://localhost:8000/api/",
 
   courses: [],
 
