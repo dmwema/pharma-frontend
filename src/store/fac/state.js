@@ -5,9 +5,9 @@ export default {
 
   api_url: "http://localhost:8000/api/",
 
-  courses: [],
+  teacher_base_url: "http://localhost:8080/#/t/sign-up/",
 
-  students: [],
+  courses: [],
 
   validProfLink: false,
 

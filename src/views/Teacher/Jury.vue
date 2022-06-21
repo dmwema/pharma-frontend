@@ -26,7 +26,42 @@
 
     <a-tabs default-active-key="1">
       <a-tab-pane v-for="deliberation in deliberations" :key="deliberation.id" :tab="deliberation.title">
-        
+        <a-tabs default-active-key="1">
+          <a-tab-pane key="1" tab="Etat de cotes">
+            <!-- Test List card -->
+            <a-card
+              :bordered="true"
+              class="header-solid mb-24"
+              :bodyStyle="{ padding: 0, paddingTop: '16px' }"
+            >
+              <a-table class="mt-20"
+                :columns="columns"
+                :data-source="cotes_state[deliberation.id]"
+                :pagination="{pageSize: pageSize,}"
+              >
+
+                <template slot="date" slot-scope="date">{{ moment(date).format("D MMM YYYY") }}</template>
+
+                <template slot="actions" slot-scope="id" v-if="false">
+                  <a-button icon="delete" type="danger" class="btn-status border-danger mr-5">
+                    Rejeter.
+                  </a-button>	
+                  <a-button icon="edit" type="primary" class="btn-status border-primary mr-5">
+                    Valider.
+                  </a-button>		
+                </template>	
+
+              </a-table>
+            </a-card>
+            <!-- / Test List card -->
+          </a-tab-pane>
+
+          <a-tab-pane key="2" tab="Critères de délibération">
+          </a-tab-pane>
+
+          <a-tab-pane key="3" tab="Discussions">
+          </a-tab-pane>
+        </a-tabs>
       </a-tab-pane>
     </a-tabs>
   </div>
@@ -79,75 +114,6 @@ const columns = [
   },
 ];
 
-// "Invoices" list data.
-const invoiceData = [];
-
-// "Your Transactions" list data.
-const transactionsData = [
-  {
-    period: "NEWEST",
-  },
-  {
-    title: "Netflix",
-    datetime: "27 March 2021, at 12:30 PM",
-    amount: "2,500",
-    type: -1, // 0 is for pending, 1 is for deposit, -1 is for withdrawal.
-    status: "danger",
-  },
-  {
-    title: "Apple",
-    datetime: "27 March 2021, at 04:30 AM",
-    amount: "2,000",
-    type: 1,
-    status: "success",
-  },
-  {
-    period: "YESTERDAY",
-  },
-  {
-    title: "Stripe",
-    datetime: "26 March 2021, at 12:30 AM",
-    amount: "750",
-    type: 1,
-    status: "success",
-  },
-  {
-    title: "HubSpot",
-    datetime: "26 March 2021, at 11:30 AM",
-    amount: "1,050",
-    type: 1,
-    status: "success",
-  },
-  {
-    title: "Creative Tim",
-    datetime: "26 March 2021, at 07:30 AM",
-    amount: "2,400",
-    type: 1,
-    status: "success",
-  },
-  {
-    title: "Webflow",
-    datetime: "26 March 2021, at 04:00 AM",
-    amount: "Pending",
-    type: 0,
-    status: "warning",
-  },
-  {
-    title: "Apple",
-    datetime: "27 March 2021, at 04:30 AM",
-    amount: "2,000",
-    type: 1,
-    status: "success",
-  },
-  {
-    title: "Stripe",
-    datetime: "26 March 2021, at 12:30 AM",
-    amount: "750",
-    type: 1,
-    status: "success",
-  },
-];
-
 export default {
   components: {
     CardCredit,
@@ -160,15 +126,22 @@ export default {
   data() {
     return {
 
+      // First table's number of rows per page.
+      pageSize: 10,
+
+      columns: columns,
+
+      cotes_state: {
+        8: [
+          {
+            'course': 'aze',
+          }
+        ]
+      },
+
       is_member: false,
 
       role: 0,
-
-      // Associating "Invoices" list data with its corresponding property.
-      invoiceData,
-
-      // Associating "Your Transactions" list data with its corresponding property.
-      transactionsData,
     };
   },
 
@@ -199,6 +172,15 @@ export default {
     this.$store.dispatch("getDeliberationCotes", {});
 		this.$store.dispatch("getDeliberations", this.$route.params.promotion_id);
   },
+
+  watch: {
+    deliberations(value) {
+      value.forEach(element => {
+        this.cotes_state[element.id] = element.cotes   
+      });
+      console.log(this.cotes_state)
+    }
+  }
 };
 </script>
 

@@ -46,7 +46,7 @@
 					</router-link>
 				</a-menu-item>
 
-				<a-sub-menu key="tests" style="padding: 0;">
+				<a-sub-menu key="courses" style="padding: 0;">
 					<span slot="title">
 						<span class="icon">
 							<a-icon type="appstore" theme="filled" class="m-0" />
@@ -62,7 +62,7 @@
 						</a-menu-item-group>
 				</a-sub-menu>
 
-				<a-sub-menu key="ratings" style="padding: 0;">
+				<a-sub-menu key="students" style="padding: 0;">
 					<span slot="title">
 						<span class="icon">
 							<a-icon type="appstore" theme="filled" class="m-0" />
@@ -93,6 +93,21 @@
 					<a-menu-item-group>
 						<a-menu-item v-for="promotion in promotions" :key="promotion.id">
 							<router-link :to="'/f/deliberation/' + promotion.id">
+								<span class="label">{{ promotion.name }}</span>
+							</router-link>
+						</a-menu-item>
+					</a-menu-item-group>
+				</a-sub-menu>
+				<a-sub-menu key="session" style="padding: 0;">
+					<span slot="title">
+						<span class="icon">
+							<a-icon type="appstore" theme="filled" class="m-0" />
+						</span>
+						<span class="label">Session</span>
+					</span>
+					<a-menu-item-group>
+						<a-menu-item v-for="promotion in promotions" :key="promotion.id">
+							<router-link :to="'/f/session/' + promotion.id">
 								<span class="label">{{ promotion.name }}</span>
 							</router-link>
 						</a-menu-item>

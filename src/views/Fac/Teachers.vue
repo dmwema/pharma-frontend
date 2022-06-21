@@ -32,7 +32,6 @@
 						:data-source="data"
 						:pagination="{pageSize: pageSize,}"
 					>
-
 						<template slot="id" slot-scope="id">#{{ id }}</template>
 
 						<template slot="actions"  slot-scope="id">
@@ -42,10 +41,10 @@
 							<a-button @click="showEditModal(id)" icon="edit" type="primary" class="btn-status border-primary mr-5">
 								Modif.
 							</a-button>		
-							<a-button v-if="!has_login(id)" @click="genLogin(id)" icon="eye" type="default" clalss="btn-status border-default mr-5">
+							<a-button v-if="!localDatas[id]" @click="genLogin(id)" icon="lock" type="default" clalss="btn-status border-default mr-5">
 								Login
 							</a-button>	
-							<a-button v-if="has_login(id)" @click="genLogin(id)" icon="eye" type="default" clalss="btn-status border-default mr-5">
+							<a-button v-if="localDatas[id]" @click="show(id)" icon="eye" type="primary" clalss="btn-status border-primary mr-5">
 								Voir
 							</a-button>		
 						</template>	
@@ -198,6 +197,13 @@
 					
 			</a-form>
         </a-modal>	
+        
+        <a-modal v-model="visible3">
+			<h5>
+			<small>lien</small> : <a :href="link">{{ link }}</a><br>
+			<small>Code secret</small> : {{ secret }}
+			</h5>
+        </a-modal>	
 		
 	</div>
 
@@ -245,21 +251,22 @@
 		},
 	];
 
-	// Table rows
-	const data = [
-	];
-
 	export default {
 		created () {
 		},
-		store:store,
 		components: {
 		},
 		data() {
 			return {
+
+				localDatas: {},
 				
 				// Table columns
 				columns,
+
+				link: '',
+
+				secret: '',
 
 				// First table's number of rows per page.
 				pageSize: 10,
@@ -273,8 +280,13 @@
 				//modal visibility
       			visible: false,
 
+				store:store,
+
 				//modal visibility
       			visible2: false,
+
+				//modal visibility
+      			visible3: false,
 				
 				formLayout: 'horizontal',
       			
@@ -296,6 +308,16 @@
 				editProfStore: 'editProf',
 				deleteProf: 'deleteProf',
 			}),
+
+			show (id) {
+				this.data.forEach(element => {
+					if(element.id === id) {
+						this.link = store.state.teacher_base_url + element.link
+						this.secret = element.secret
+					}
+				});
+				this.visible3 = true
+			},
 
 			deleteRow(id) {
 				this.editSelectedProf(id)
@@ -415,7 +437,7 @@
 			},
 
 			has_login(id) {
-				data.forEach(element => {
+				this.localDatas.forEach(element => {
 					if (element.id === id) {
 						return element.has_logins
 					}
@@ -519,6 +541,16 @@
 
 		created() {
     		this.$store.dispatch('getProfs')
+		}, 
+
+		watch: {
+			data(value) {
+				if (value !== undefined) {
+					value.forEach(element => {
+						this.localDatas[element.id] = element.has_logins
+					});
+				}
+			}
 		}
 	}
 </script>

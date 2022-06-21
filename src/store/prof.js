@@ -81,7 +81,6 @@ export default {
     },
 
     profSelectedCourse(state) {
-      console.log(state);
       return state.selectedCourse;
     },
 

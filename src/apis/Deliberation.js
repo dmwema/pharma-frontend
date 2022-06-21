@@ -3,7 +3,7 @@ import auth from "../store/auth";
 import Api from "./Api";
 
 export default {
-  all(promtion_id) {
+  all(promotion_id) {
     return Api.get("deliberations/1", {
       promotion_id: 1,
     });

@@ -181,9 +181,21 @@ let routes = [
     meta: {
       title: "Bureaux Jury",
       sidebarMap: ["Delibération"],
-      breadcrumbs: ["Dashboards", "courses"],
+      breadcrumbs: ["Dashboards", "délibérations"],
     },
     component: () => import("../views/Fac/Deliberation.vue"),
+  },
+
+  {
+    path: "/f/session/:promo_id",
+    name: "DashboardsFacSession",
+    layout: "fac",
+    meta: {
+      title: "Sessions",
+      sidebarMap: ["Séssions"],
+      breadcrumbs: ["Dashboards", "séssions"],
+    },
+    component: () => import("../views/Fac/Session.vue"),
   },
 
   {

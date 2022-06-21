@@ -19,6 +19,8 @@ export const SET_PROFS = (state, profs) => {
       fullname: prof.lastname + " " + prof.middlename + " " + prof.firstname,
       sexe: prof.gender,
       email: prof.email,
+      link: prof.link,
+      secret: prof.secret,
       has_logins: prof.has_logins,
     });
   });

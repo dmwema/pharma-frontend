@@ -22,7 +22,7 @@
                                 </div>
                                 <a-collapse v-model="activeKey">
                                     <a-collapse-panel key="1" header="Cotes annuels">
-										<a-checkbox class="azeazeaze" v-model="annualCoteChecks[work.id]" v-for="work in course.annual_works" :key="work.id">
+										<a-checkbox @change="change" class="azeazeaze" v-model="annualCoteChecks[0]" v-for="work in course.annual_works" :key="work.id">
                                             {{ work.title }}
                                         </a-checkbox>
                                     </a-collapse-panel>
@@ -121,7 +121,9 @@
 					}
 				},
 
-				annualCoteChecks: {},
+				annualCoteChecks: {
+					0: true
+				},
 
 				examCoteChecks: {},
 
@@ -228,7 +230,11 @@
 					this.data = data ;
 				}
 			},
-
+			change() {
+				console.log(this.annualCoteChecks)
+				this.annualCoteChecks[25] = false
+				this.annualCoteChecks [26] = true
+			},
 			// Event listener for table row selection change.
 			onSelectChange(selectedRowKeys) {
 				this.selectedRowKeys = selectedRowKeys;
@@ -291,6 +297,7 @@
 
 		watch: {
 			courses (value) {
+				console.log(this.annualCoteChecks)
 				if (value !== undefined) {
 					value.forEach(course => {
 						course.annual_works.forEach(work => {
