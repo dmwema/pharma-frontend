@@ -72,6 +72,20 @@
 
 				</a-form-item>
 
+				<a-form-item class="mb-10" label="Session" :colon="false">
+					<a-select 
+						v-decorator="[
+							'session_id',
+							{ rules: [{ required: true, message: 'Veuillez selectionner une session!' }] },
+						]"
+						placeholder="Selectionnez une session parmis celles enrégistrées"
+					>
+						<a-select-option :value="session.id" v-for="session in sessions" :key="session.id">
+						{{ session.title }}
+						</a-select-option>
+					</a-select>
+				</a-form-item>
+
 				<a-form-item class="mb-10" label="Message à afficher sur le communiqué" :colon="false">
 					<a-textarea v-decorator="[
 						'message',
@@ -209,7 +223,7 @@
 			handleOk2(e) {
 				this.form_new.validateFields((err, values) => {
 					if ( !err ) {
-						this.newDeliberation({ date: values.date, title: values.title, message: values.message, promotion_id: this.$route.params.promotion_id })
+						this.newDeliberation({ date: values.date, title: values.title, message: values.message, promotion_id: this.$route.params.promotion_id, session_id: values.session_id })
 						this.visible2 = false
 					}
 				});
@@ -219,11 +233,13 @@
 		computed: {
 			...Vuex.mapGetters({
 			deliberations: "deliberations",
+			sessions: "sessions",
 			}),
 		},
 
 		mounted() {
 			this.$store.dispatch("getDeliberations", 1);
+    		this.$store.dispatch('getSessions', this.$route.params.promo_id)
 		},
 	})
 

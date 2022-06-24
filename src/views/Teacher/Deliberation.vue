@@ -1,14 +1,9 @@
-<!-- 
-	This is the DataTables page, it uses the dashboard layout in: 
-	"./layouts/Dashboard.vue" .
- -->
-
 <template>
 
 	<div>
-        <a-tabs>
+        <a-tabs @change="changeTab" >
         	<a-tab-pane v-for="deliberation in deliberations" :key="deliberation.id" :tab="deliberation.title">
-				<a-tabs @change="callback">
+				<a-tabs>
                     <a-tab-pane v-for="course in courses" :key="course.id" :tab="course.title">
 						<!-- Test List card -->
 						<a-card :bordered="true" class="header-solid mb-24" :bodyStyle="{padding: 0, paddingTop: '16px'}">
@@ -18,22 +13,13 @@
 							</template>	
                             <div style="padding:0 30px 30px">
                                 <div>
-                                    <p>Une fois les cotes envoyé, la moyenne est calculée sur 20 et est soumis au jury</p>
+                                    <p class="m-0">Une fois les cotes envoyé, la moyenne est calculée sur 20 et est soumis au jury</p>
                                 </div>
-                                <a-collapse v-model="activeKey">
-                                    <a-collapse-panel key="1" header="Cotes annuels">
-										<a-checkbox @change="change" class="azeazeaze" v-model="annualCoteChecks[0]" v-for="work in course.annual_works" :key="work.id">
-                                            {{ work.title }}
-                                        </a-checkbox>
-                                    </a-collapse-panel>
-                                    <a-collapse-panel key="2" header="Cotes examen" :disabled="false">
-                                        <a-checkbox v-model="examCoteChecks[work.id]" v-for="work in course.annual_works" :key="work.id">
-                                            {{ work.title }}
-                                        </a-checkbox>
-                                    </a-collapse-panel>
-                                </a-collapse>
-                                <a-button @click="sendCotes" style="margin-top:15px" icon="save">
+                                <a-button @click="sendCotes" style="margin-top:10px" icon="save">
                                     Déposer les cotes
+                                </a-button>
+                                <a-button @click="seeCotes(course.id)" style="margin-top:10px; margin-left: 10px" icon="eye">
+                                    Voir les cotes
                                 </a-button>
                             </div>
 				        </a-card>
@@ -43,34 +29,21 @@
             </a-tab-pane>
         </a-tabs>
         
-        <a-modal v-model="visible" title="Enrégistrer une épreuve" @ok="handleOk">
-            <a-form :form="form">
-
-				<a-form-item class="mb-10" label="Date" :colon="false">
-					<a-input v-decorator="[
-							'date',
-							{ rules: [{ required: true, message: 'Vous devez entrer une date' }] },
-					]"
-					type="date" placeholder="Date de l'épreuve" />
-				</a-form-item>
-
-				<a-form-item class="mb-10" label="Donnez un titre à l'épreuve" :colon="false">
-					<a-input v-decorator="[
-							'title',
-							{ rules: [{ required: true, message: 'Vous devez entrer un intitulé' }] },
-					]" 
-					placeholder="Intitulé" />
-				</a-form-item>
-
-				<a-form-item class="mb-10" label="Donnez une description de l'épreuve" :colon="false">
-					<a-input v-decorator="[
-						'description',
-						{ rules: [{ required: true, message: 'Vous devez entrer une description' }] },
-					]" 
-					placeholder="Description" />
-				</a-form-item>
-					
-			</a-form>
+        <a-modal centered width="100%" v-model="visible" title="Toutes les cotes" @ok="handleOk">
+			<table class="cote_table">
+				<!-- Responsive Table Header Section -->
+				<thead>
+					<tr>
+						<th v-for="coteColumn in coteColumns" :key="coteColumn">{{ coteColumn }}</th>
+					</tr>
+				</thead>
+				<!-- Responsive Table Body Section -->
+				<tbody class="responsive-table__body">
+					<tr v-for="data in coteData" :key="data.key">
+						<td v-for="row in data" :key="row" class="responsive-table__body__text responsive-table__body__text--types">{{ row == null ? 'Vide': row }}</td>
+					</tr>
+				</tbody>
+			</table>
         </a-modal>	
 		
 	</div>
@@ -83,7 +56,7 @@
 	let momentjs = require('moment');
 	import Vuex from 'vuex'
 
-    const datas =  [];
+    const data =  [];
 
 	// Table columns
 	const columns = [
@@ -121,9 +94,17 @@
 					}
 				},
 
+				selected_deliberation_id: null,
+
 				annualCoteChecks: {
 					0: true
 				},
+
+				coteColumns: [],
+
+				coteData: [],
+
+				data: data,
 
 				examCoteChecks: {},
 
@@ -165,6 +146,7 @@
 				editSelectedCourse: 'editSelectedCourse',
 				deleteTest: 'deleteTest',
 				updateStoreCotes: 'updateCotes',
+				getAllCourseCotes: 'getAllCourseCotes',
 			}),
 			deleteRow(id) {
 				this.$swal.fire({
@@ -185,6 +167,22 @@
 
 			sendCotes () {
 				console.log({'annual': this.annualCoteChecks, 'exam': this.examCoteChecks})
+			},
+
+			seeCotes (course_id) {
+				this.showModal()
+				this.getAllCourseCotes({course_id: course_id, session_id: this.selected_deliberation_id})
+				.then(response => {
+					console.log(response)
+					this.coteColumns = response.data.columns
+					this.coteData = response.data.datas
+				}).catch(err => {
+					console.log(err)
+				})
+			},
+
+			changeTab(value) {
+				this.selected_deliberation_id = value
 			},
 
 			updateCotes() {
@@ -292,26 +290,21 @@
 				getSingleCote: 'getSingleCote',
 				coteObj: 'coteObj',
 			    deliberations: "deliberations",
+			    allcotes: "deliberations",
 			})
 		},
 
 		watch: {
-			courses (value) {
-				console.log(this.annualCoteChecks)
-				if (value !== undefined) {
-					value.forEach(course => {
-						course.annual_works.forEach(work => {
-							this.annualCoteChecks[work.id] = false
-							this.examCoteChecks[work.id] = false
-						});
-					});
+			deliberations(values) {
+				if (values !== undefined && this.selected_deliberation_id === null) {
+					this.selected_deliberation_id = values[0].id
 				}
 			}
 		},
 
 		mounted() {
-			this.$store.dispatch('profTests', 1)
 			this.$store.dispatch("getDeliberations", 1);
+			this.$store.dispatch('profTests')
 		},
 	}
 </script>
@@ -339,6 +332,77 @@ input[type=number] {
 
 .cote_input.border-red {
 	width: 70px;
-	border: 1px solid #000;
+}
+
+/** table */
+
+table.cote_table { 
+  width: 100%; 
+  border-collapse: collapse; 
+}
+
+.cote_table tr:nth-of-type(odd) { 
+  background: #eee; 
+}
+.cote_table th { 
+  background: #fff; 
+  color: #000; 
+  font-weight: bold; 
+}
+.cote_table td, .cote_table th { 
+  padding: 6px; 
+  text-align: left; 
+}
+
+@media 
+only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px)  {
+
+	/* Force table to not be like tables anymore */
+	table.cote_table , .cote_table thead, .cote_table tbody, .cote_table th, .cote_table td, .cote_table tr { 
+		display: block; 
+	}
+	
+	/* Hide table headers (but not display: none;, for accessibility) */
+	.cote_table thead tr { 
+		position: absolute;
+		top: -9999px;
+		left: -9999px;
+	}
+	
+	.cote_table tr { border: 1px solid #ccc; }
+	
+	.cote_table td { 
+		/* Behave  like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee; 
+		position: relative;
+		padding-left: 50%; 
+	}
+	
+	.cote_table td:before { 
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 45%; 
+		padding-right: 10px; 
+		white-space: nowrap;
+	}
+	
+	/*
+	Label the data
+	*/
+	.cote_table td:nth-of-type(1):before { content: "First Name"; }
+	.cote_table td:nth-of-type(2):before { content: "Last Name"; }
+	.cote_table td:nth-of-type(3):before { content: "Job Title"; }
+	.cote_table td:nth-of-type(4):before { content: "Favorite Color"; }
+	.cote_table td:nth-of-type(5):before { content: "Wars of Trek?"; }
+	.cote_table td:nth-of-type(6):before { content: "Secret Alias"; }
+	.cote_table td:nth-of-type(7):before { content: "Date of Birth"; }
+	.cote_table td:nth-of-type(8):before { content: "Dream Vacation City"; }
+	.cote_table td:nth-of-type(9):before { content: "GPA"; }
+	.cote_table td:nth-of-type(10):before { content: "Arbitrary Data"; }
 }
 </style>

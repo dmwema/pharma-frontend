@@ -171,6 +171,7 @@ export default {
     this.$store.dispatch("getJury");
     this.$store.dispatch("getDeliberationCotes", {});
 		this.$store.dispatch("getDeliberations", this.$route.params.promotion_id);
+    this.$store.dispatch('getSessions', this.$route.params.promo_id)
   },
 
   watch: {

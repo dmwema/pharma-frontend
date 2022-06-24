@@ -3,6 +3,7 @@ import Deliberation from "../apis/Deliberation";
 import Toast from "./alert";
 import Session from "../apis/Session";
 import Schedule from "../apis/Schedule";
+import Course from "../apis/Course";
 
 export default {
   state: {
@@ -222,6 +223,10 @@ export default {
 
     editSelectedSession(store, id) {
       store.commit("SET_SELECTED_SESSION", id);
+    },
+
+    getAllCourseCotes(store, data) {
+      return Course.allCotes(data);
     },
   },
 };

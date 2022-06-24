@@ -34,4 +34,14 @@ export default {
     let prof_id = auth.state.user.professor.id;
     return Api.get("teacher/courses/" + prof_id, { teacher_id: prof_id });
   },
+
+  allCotes(data) {
+    return Api.get(
+      "courses/all-cotes/" + data.course_id + "-" + data.session_id,
+      {
+        course_id: data.course_id,
+        session_id: data.session_id,
+      }
+    );
+  },
 };
