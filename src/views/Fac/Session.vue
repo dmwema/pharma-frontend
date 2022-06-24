@@ -39,11 +39,8 @@
 						<template slot="actions"  slot-scope="id">
 							<a-button @click="deleteRow(id)" icon="delete" type="danger" class="btn-status border-danger mr-5">
 								Suppr.
-							</a-button>	
-							<a-button icon="edit" type="primary" class="btn-status border-primary mr-5">
-								Modif.
-							</a-button>	
-							<a-button icon="table" type="success" class="btn-status border-primary mr-5">
+							</a-button>		
+							<a-button @click="showHorraire(id)" icon="table" type="success" class="btn-status border-primary mr-5">
 								Horraire
 							</a-button>		
 						</template>	
@@ -55,7 +52,7 @@
 				<!-- / Test List card -->
         
 
-        <a-modal v-model="visible" title="Enrégistrer une session" @ok="handleOk">
+        <a-modal v-model="visible" title="Enrégistrer une session" centered @ok="handleOk">
             <a-form :form="form" class="row">
 				<a-form-item class="mb-10 col-md-6" label="Intitulé" :colon="false">
 					<a-input 
@@ -72,11 +69,69 @@
                             v-model:value="value1"   
 							:placeholder="['Date du début', 'Date de la fin']"
                         />
-
                     </a-space>
 				</a-form-item>
 
 			</a-form>
+        </a-modal>
+
+        <a-modal centered width="90%" v-model="visible2" :title="'Horraire des examens ' + selectedSession.title + ' G1 Pharmacie'" @ok="handleOk2">
+			<a-row type="flex" :gutter="24">
+				<a-col :span="16">
+					<!-- Test table -->
+					<a-table class="mt-20"
+						:columns="columns2"
+						:data-source="selectedSession.schedules"
+						:pagination="{pageSize: pageSize,}"
+					>
+
+						<template slot="id" slot-scope="id">#{{ id }}</template>
+
+
+						<template slot="actions"  slot-scope="id">
+							<a-button @click="deleteRow2(id)" icon="minus" type="danger" class="btn-status border-danger">
+							Rétirer</a-button>
+						</template>	
+
+					</a-table>
+					<!-- / Orders table -->
+				</a-col>
+				<a-col :span="8">
+				<a-card :bordered="true" class="header-solid mb-24" :bodyStyle="{paddingTop: '16px'}">
+					<h6>Ajouter un cours à l'horraire</h6>
+					<a-form
+						:form="form_new"
+						class="row"
+						autocomplete="off"
+						@submit="handleCreateSubmit"	
+					>
+						<a-form-item class="mb-10 col-md-6" label="Cours" :colon="false">
+							<a-select 
+								v-decorator="[
+									'course',
+									{ rules: [{ required: true, message: 'Veuillez selectionner un cours!' }] },
+								]"
+								placeholder="Selectionnez un cours parmis ceux enrégistrés"
+							>
+								<a-select-option :value="course.id" v-for="course in courses" :key="course.id">
+								{{ course.title + ' (' + course.professor + ')' }}
+								</a-select-option>
+							</a-select>
+						</a-form-item>
+
+						<a-form-item class="mb-10" label="Date et heure" :colon="false">
+							<a-date-picker v-decorator="[
+									'date',
+									{ rules: [{ required: true, message: 'Veuillez selectionner une date!' }] },
+								]" show-time format="DD-MM-YYYY à HH:mm" placeholder="Date et Heure" @ok="onOk" />
+						</a-form-item>
+						<a-form-item>
+							<a-button type="primary" html-type="submit">Ajouter</a-button>
+						</a-form-item>
+					</a-form>	
+				</a-card>			
+				</a-col>
+			</a-row>
         </a-modal>	
 
 	</div>
@@ -123,6 +178,33 @@
 		},
 	];
 
+	const columns2 = [
+		{
+			title: 'ID',
+			dataIndex: 'key',
+			sorter: (a, b) => a.key - b.key,
+			sortDirections: ['descend', 'ascend'],
+			scopedSlots: { customRender: 'key' },
+		},
+		{
+			title: 'Cours',
+			dataIndex: 'course',
+			sorter: (a, b) => a.course.length - b.course.length,
+			sortDirections: ['descend', 'ascend'],
+		},
+		{
+			title: 'Date',
+			dataIndex: 'date',
+			sorter: (a, b) => stringSorter(a, b, 'email'),
+			sortDirections: ['descend', 'ascend'],
+		},
+		{
+			title: '',
+			dataIndex: 'id',
+			scopedSlots: { customRender: 'actions' },
+		},
+	];
+
 	// Table rows
 	const data = [
 	];
@@ -133,6 +215,8 @@
 				
 				// Table columns
 				columns,
+				// Table columns
+				columns2,
 
                 dateFormat: "YYYY-MM-DD",
 				
@@ -156,20 +240,28 @@
       			
 				form: this.$form.createForm(this, { name: 'coordinated' }),
       			
+				form_new: this.$form.createForm(this, { name: 'newForm' }),
+      			
 				form_edit: this.$form.createForm(this, { name: 'editform' }),
 
 				// Table's selected rows
       			selectedRowKeys: [],
+
+				date: null,
 
 			}
 		},
 		methods: {
 			...Vuex.mapActions({
 				deleteSession: 'deleteSession',
+				deleteSchedule: 'deleteSchedule',
 				addSession: 'addSession',
-				//editSelectedSession: 'editSelectedSession',
+				editSelectedSession: 'editSelectedSession',
+				addSchedule: 'addSchedule',
 			}),
 
+			onOk (value) {		
+			},
 			deleteRow(id) {
 				//this.editSelectedSession(id)
 				this.$swal.fire({
@@ -188,6 +280,17 @@
 					}
 				})
 			},
+
+			deleteRow2(id) {
+				this.deleteSchedule({id: id, session_id: this.selectedSession.id})
+			},
+
+			showHorraire(id) {
+				this.editSelectedSession(id)
+				console.log(this.selectedSession)
+				this.visible2 = true
+			},
+
 			// Event listener for input change on table search field.
 			onSearchChange() {
 				if( this.query.length > 0 ) {
@@ -260,6 +363,11 @@
 				});
 			},
 			
+			handleOk2(e) {
+				e.preventDefault();
+				console.log('ok')
+			},
+			
 			handleChange(info) {
 				const status = info.file.status;
 				if (status !== 'uploading') {
@@ -284,6 +392,37 @@
 					}
 				});
 			},
+
+			handleCreateSubmit(e) {
+				e.preventDefault();
+				this.form_new.validateFields((err, values) => {
+					if (!err) {
+						const Toast = this.$swal.mixin({
+							toast: true,
+							position: 'top-end',
+							showConfirmButton: false,
+							timer: 2000,
+							timerProgressBar: false,
+							didOpen: (toast) => {
+								toast.addEventListener('mouseenter', this.$swal.stopTimer)
+								toast.addEventListener('mouseleave', this.$swal.resumeTimer)
+							}
+						})
+
+						let moment_date = values.date._d
+						let save_date = moment_date.getFullYear() + '-' + (moment_date.getMonth() + 1) + '-' + moment_date.getDate() + ' ' + moment_date.getHours() + ':' + moment_date.getMinutes()
+						
+						let datas = {
+							course_id: values.course,
+							date: save_date,
+							session_id: this.selectedSession.id,
+							promotion_id: this.$route.params.promo_id
+						}
+						
+						this.addSchedule(datas)
+					}
+				});
+			},
 			
 			handleSelectChange(value) {
 			},
@@ -293,12 +432,14 @@
 		computed: {
 			...Vuex.mapGetters({
 				data: 'sessions',
-				selectedStudent: 'selectedSession',
+				selectedSession: 'getSelectedSession',
+				courses: 'courses',
 			}),
 		},
 
 		created() {
     		this.$store.dispatch('getSessions', this.$route.params.promo_id)
+    		this.$store.dispatch('getCourses', this.$route.params.promo_id)
 		}
 	}
 </script>

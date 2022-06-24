@@ -3,8 +3,8 @@ import auth from "../store/auth";
 import Api from "./Api";
 
 export default {
-  all() {
-    return Api.get("courses/1");
+  all(id) {
+    return Api.get("courses/" + id);
   },
 
   update(course) {

@@ -83,8 +83,8 @@ export const editSelectedProf = (store, id) => {
 
 // courses
 
-export const getCourses = (store) => {
-  Course.all()
+export const getCourses = (store, id) => {
+  Course.all(id)
     .then(function (response) {
       store.commit("GET_COURSES", response.data);
     })

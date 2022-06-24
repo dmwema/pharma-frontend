@@ -2,6 +2,7 @@ import rootState from "../store/fac/state";
 import Deliberation from "../apis/Deliberation";
 import Toast from "./alert";
 import Session from "../apis/Session";
+import Schedule from "../apis/Schedule";
 
 export default {
   state: {
@@ -28,7 +29,9 @@ export default {
     },
 
     SET_SELECTED_SESSION(state, id) {
-      state.selectedSession = id;
+      state.selectedSession = state.sessions.find(
+        (session) => session.id === id
+      );
     },
 
     SET_DELIBERATION_COTES(state, id) {
@@ -40,6 +43,15 @@ export default {
       datas.forEach((session) => {
         state.sessions.push(session);
       });
+    },
+    REMOVE_SCHEDULE: (state, data) => {
+      let i = state.selectedSession.schedules
+        .map((item) => item.id)
+        .indexOf(data.id);
+      state.selectedSession.schedules.splice(i, 1);
+    },
+    ADD_SCHEDULE: (state, data) => {
+      state.selectedSession.schedules.push(data);
     },
   },
 
@@ -100,6 +112,27 @@ export default {
         });
     },
 
+    addSchedule(state, data) {
+      Schedule.add(data)
+        .then((response) => {
+          if (response.data.success == true) {
+            Toast.fire({
+              icon: "success",
+              title: response.data.message,
+            });
+            store.commit("ADD_SCHEDULE", response.data.schedule);
+          } else {
+            Toast.fire({
+              icon: "warning",
+              title: response.data.message,
+            });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
     publishDeliberation(store, deliberation_id) {
       Deliberation.publish(deliberation_id)
         .then((response) => {
@@ -142,6 +175,19 @@ export default {
         });
     },
 
+    deleteSchedule(store, data) {
+      Schedule.delete(data)
+        .then((response) => {
+          if (response.data.success === true) {
+            console.log(response.data.message);
+            store.commit("REMOVE_SCHEDULE", data);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+
     newDeliberation(store, values) {
       Deliberation.add(values)
         .then((response) => {
@@ -174,8 +220,7 @@ export default {
       store.commit("SET_SELECTED_DELIBERATION", id);
     },
 
-    editselectedSession(store, id) {
-      console.log(id);
+    editSelectedSession(store, id) {
       store.commit("SET_SELECTED_SESSION", id);
     },
   },

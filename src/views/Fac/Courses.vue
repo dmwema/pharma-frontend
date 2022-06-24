@@ -131,7 +131,7 @@
 					<a-select 
 						v-decorator="[
 							'professor',
-							{ rules: [{ required: true, message: 'Veuillez selectionner un sexe!' }] },
+							{ rules: [{ required: true, message: 'Veuillez selectionner un cours!' }] },
 						]"
 						placeholder="Selectionnez un professeur parmis ceux enrégistrés"
 					>
@@ -396,7 +396,7 @@
 		},
 
 		created() {
-    		this.$store.dispatch('getCourses')
+    		this.$store.dispatch('getCourses', this.$route.params.promo_id)
     		this.$store.dispatch('getProfs')
 		}
 	}
