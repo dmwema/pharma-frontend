@@ -15,7 +15,7 @@
                                 <div>
                                     <p class="m-0">Une fois les cotes envoyé, la moyenne est calculée sur 20 et est soumis au jury</p>
                                 </div>
-                                <a-button @click="sendCotes" style="margin-top:10px" icon="save">
+                                <a-button @click="sendCotes(course.id)" style="margin-top:10px" icon="save">
                                     Déposer les cotes
                                 </a-button>
                                 <a-button @click="seeCotes(course.id)" style="margin-top:10px; margin-left: 10px" icon="eye">
@@ -35,12 +35,12 @@
 				<thead>
 					<tr>
 						<th v-for="coteColumn in coteColumns" :key="coteColumn">{{ coteColumn }}</th>
-					</tr>
+ 						</tr>
 				</thead>
 				<!-- Responsive Table Body Section -->
 				<tbody class="responsive-table__body">
 					<tr v-for="data in coteData" :key="data.key">
-						<td v-for="row in data" :key="row" class="responsive-table__body__text responsive-table__body__text--types">{{ row == null ? 'Vide': row }}</td>
+						<td v-for="row in data" :key="row">{{ row == null ? 'Vide': row }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -147,6 +147,7 @@
 				deleteTest: 'deleteTest',
 				updateStoreCotes: 'updateCotes',
 				getAllCourseCotes: 'getAllCourseCotes',
+				sendCotesStore: 'sendCotes'
 			}),
 			deleteRow(id) {
 				this.$swal.fire({
@@ -165,8 +166,21 @@
 				})
 			},
 
-			sendCotes () {
-				console.log({'annual': this.annualCoteChecks, 'exam': this.examCoteChecks})
+			sendCotes (course_id) {
+				this.$swal.fire({
+					title: "Êtes-vous sûre ?",
+					text: "Une fois que vous avez deposé le côtes vous ne pourez plus revenir en arrière, Rassurez-vous que les cotes de toutes les épreuves sont bien transcrits",
+					icon: "warning",
+					showDenyButton: true,
+				  	denyButtonText: `Déposer`,
+					confirmButtonText: 'Annuler',
+  					focusConfirm: false,
+					dangerMode: true,
+				}).then((result) => {
+					if (result.isDenied) {
+						this.sendCotesStore({course_id: course_id, session_id: this.selected_deliberation_id})
+					}
+				})
 			},
 
 			seeCotes (course_id) {

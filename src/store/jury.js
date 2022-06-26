@@ -228,5 +228,16 @@ export default {
     getAllCourseCotes(store, data) {
       return Course.allCotes(data);
     },
+
+    sendCotes(store, data) {
+      console.log(data);
+      Session.sendCotes(data)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
   },
 };

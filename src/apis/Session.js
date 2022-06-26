@@ -22,4 +22,11 @@ export default {
       promotion_id: data.promotion_id,
     });
   },
+
+  sendCotes(data) {
+    return Api.post("/send-cotes", {
+      session_id: data.session_id,
+      course_id: data.course_id,
+    });
+  },
 };
