@@ -12,13 +12,16 @@
 								<div style="width:100%; height:1px; background-color:#F1F1F1"></div>
 							</template>	
                             <div style="padding:0 30px 30px">
-                                <div>
-                                    <p class="m-0">Une fois les cotes envoyé, la moyenne est calculée sur 20 et est soumis au jury</p>
-                                </div>
-                                <a-button @click="sendCotes(course.id)" style="margin-top:10px" icon="save">
-                                    Déposer les cotes
+								 <a-alert
+									:message="checkCotesSent(course, deliberation.id) ? 'Cotes déposés': 'Cotes non déposés'"
+									:description="checkCotesSent(course, deliberation.id) ? 'Vous avez déjà déposé les cotes de ce cours': 'Vous devez-déposer les cotes. Une fois les cotes envoyé, la moyenne est calculée sur 20 et est soumis au jury'"
+									:type="!checkCotesSent(course, deliberation.id)? 'warning': 'success'"
+									show-icon
+								/>
+                                <a-button v-if="!checkCotesSent(course, deliberation.id)" :loading="false" @click="sendCotes(course.id)" style="margin-top:10px; margin-right:10px" icon="save">
+                                    Déposer les cotes 
                                 </a-button>
-                                <a-button @click="seeCotes(course.id)" style="margin-top:10px; margin-left: 10px" icon="eye">
+                                <a-button @click="seeCotes(course.id)" style="margin-top:10px;" icon="eye">
                                     Voir les cotes
                                 </a-button>
                             </div>
@@ -87,6 +90,8 @@
 		},
 		data() {
 			return {
+
+				lcotesSent: [],
 
 				testcheck: {
 					1: {
@@ -160,11 +165,25 @@
   					focusConfirm: false,
 					dangerMode: true,
 				}).then((result) => {
-				if (result.isDenied) {
-					this.deleteTest(id)
-				}
+					if (result.isDenied) {
+						this.deleteTest(id)
+					}
 				})
 			},
+
+			checkCotesSent(course, deliberation_id) {
+				if (!this.lcotesSent === undefined) {
+					if (this.lcotesSent[deliberation_id].find(elem => elem.course === course.id).sent) {
+						return true
+					}
+				} 
+				
+				if (course.course_delib[deliberation_id]) {
+					return true
+				}
+				
+				return false
+			},	
 
 			sendCotes (course_id) {
 				this.$swal.fire({
@@ -305,6 +324,7 @@
 				coteObj: 'coteObj',
 			    deliberations: "deliberations",
 			    allcotes: "deliberations",
+			    cotesSent: "getCotesSent",
 			})
 		},
 
@@ -312,6 +332,11 @@
 			deliberations(values) {
 				if (values !== undefined && this.selected_deliberation_id === null) {
 					this.selected_deliberation_id = values[0].id
+				}
+			},
+			cotesSent(values) {
+				if (values !== undefined) {
+					this.lcotesSent = values
 				}
 			}
 		},

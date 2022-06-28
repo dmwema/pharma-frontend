@@ -49,6 +49,7 @@ export default {
           key: element.id,
           title: element.title,
           annual_works: stateElem,
+          course_delib: element.course_delib,
         });
       });
       state.tests = stateData;
@@ -97,7 +98,6 @@ export default {
     },
 
     getSingleCote: (state) => (id) => {
-      console.log();
       return state.cotes.find((row) => row.id === id).cote;
     },
   },
@@ -141,7 +141,6 @@ export default {
     deleteTest(state, id) {
       Test.delete(id)
         .then((response) => {
-          console.log(response.data);
           if (response.data.success) {
             store.commit("SET_TESTS", response.data.courses);
             Toast.fire({

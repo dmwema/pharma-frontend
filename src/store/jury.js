@@ -3,6 +3,7 @@ import Deliberation from "../apis/Deliberation";
 import Toast from "./alert";
 import Session from "../apis/Session";
 import Schedule from "../apis/Schedule";
+import ProfStore from "./prof";
 import Course from "../apis/Course";
 
 export default {
@@ -14,6 +15,7 @@ export default {
     selectedSession: {},
     deliberationCotes: [],
     sessions: [],
+    cotesSent: [],
   },
 
   mutations: {
@@ -54,6 +56,14 @@ export default {
     ADD_SCHEDULE: (state, data) => {
       state.selectedSession.schedules.push(data);
     },
+
+    COTES_SENT(state, data) {
+      state.cotesSent[data.session_id] = {
+        course: data.course_id,
+        sent: true,
+      };
+      console.log(state);
+    },
   },
 
   getters: {
@@ -89,6 +99,10 @@ export default {
 
     getSelectedSession(state) {
       return state.selectedSession;
+    },
+
+    getCotesSent(state) {
+      return state.cotesSent;
     },
   },
 
@@ -230,10 +244,12 @@ export default {
     },
 
     sendCotes(store, data) {
-      console.log(data);
       Session.sendCotes(data)
         .then((response) => {
-          console.log(response.data);
+          if (response.data.success) {
+            store.commit("COTES_SENT", data);
+            store.dispatch("profTests");
+          }
         })
         .catch((err) => {
           console.log(err);
