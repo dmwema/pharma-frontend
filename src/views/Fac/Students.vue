@@ -199,9 +199,7 @@
 
 <script>
 
-	import store from '../../store/fac'
 	import Vuex from 'vuex'
-	import Api from '../../apis/Api'
 
 	// Table columns
 	const columns = [

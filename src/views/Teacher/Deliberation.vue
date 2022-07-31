@@ -172,13 +172,10 @@
 			},
 
 			checkCotesSent(course, deliberation_id) {
-				if (!this.lcotesSent === undefined) {
-					if (this.lcotesSent[deliberation_id].find(elem => elem.course === course.id).sent) {
-						return true
-					}
-				} 
-				
-				if (course.course_delib[deliberation_id]) {
+				if (course.course_delib === undefined || course.course_delib[deliberation_id] === undefined) {
+					return false
+				}
+				if (course.course_delib[deliberation_id].has_sent) {
 					return true
 				}
 				
@@ -330,6 +327,7 @@
 
 		watch: {
 			deliberations(values) {
+				console.log(values)
 				if (values !== undefined && this.selected_deliberation_id === null) {
 					this.selected_deliberation_id = values[0].id
 				}

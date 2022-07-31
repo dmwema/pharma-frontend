@@ -22,6 +22,7 @@ export const SET_PROFS = (state, profs) => {
       link: prof.link,
       secret: prof.secret,
       has_logins: prof.has_logins,
+      user_id: prof.user_id,
     });
   });
 };

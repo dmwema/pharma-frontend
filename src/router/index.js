@@ -77,6 +77,26 @@ let routes = [
     },
   },
   {
+    path: "/t/jury/:promotion_id/:professor_id/result/:deliberation_id",
+    name: "JuryTeacherResult",
+    layout: "teacher",
+    meta: {
+      title: "JuryResult",
+      sidebarMap: ["Jury"],
+      breadcrumbs: ["Dashboards", "Jury", "Résultats"],
+    },
+    component: () => import("../views/Teacher/Results.vue"),
+    beforeEnter: (to, from, next) => {
+      if (!store.getters["auth/authentificated"]) {
+        return next({
+          name: "LoginPage",
+        });
+      }
+
+      next();
+    },
+  },
+  {
     path: "/t/courses",
     name: "TeacherCourses",
     layout: "teacher",

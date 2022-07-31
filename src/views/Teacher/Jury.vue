@@ -40,9 +40,9 @@
                 :pagination="{pageSize: pageSize,}"
               >
 
-                <template slot="date" slot-scope="date">{{ moment(date).format("D MMM YYYY") }}</template>
+                <template slot="date" slot-scope="date">{{ date }}</template>
 
-                <template slot="actions" slot-scope="id" v-if="false">
+                <template v-if="false" slot="actions" slot-scope="id">
                   <a-button icon="delete" type="danger" class="btn-status border-danger mr-5">
                     Rejeter.
                   </a-button>	
@@ -76,6 +76,7 @@ import CardPaymentMethods from "../../components/Cards/CardPaymentMethods";
 import CardInvoices from "../../components/Cards/CardInvoices";
 import CardBillingInfo from "../../components/Cards/CardBillingInfo";
 import CardTransactions from "../../components/Cards/CardTransactions";
+import moment from 'moment'
 
 
 const columns = [
@@ -103,9 +104,9 @@ const columns = [
   {
     title: 'DATE DU DEPOT',
     dataIndex: 'date',
-    sorter: (a, b) => a.description.length - b.description.length,
+    sorter: (a, b) => a.date.length - b.date.length,
     sortDirections: ['descend', 'ascend'],
-    scopedSlots: { customRender: 'description' },
+    scopedSlots: { customRender: 'date' },
   },
   {
     title: '',
@@ -171,7 +172,6 @@ export default {
     this.$store.dispatch("getJury");
     this.$store.dispatch("getDeliberationCotes", {});
 		this.$store.dispatch("getDeliberations", this.$route.params.promotion_id);
-    this.$store.dispatch('getSessions', this.$route.params.promo_id)
   },
 
   watch: {
@@ -179,7 +179,6 @@ export default {
       value.forEach(element => {
         this.cotes_state[element.id] = element.cotes   
       });
-      console.log(this.cotes_state)
     }
   }
 };

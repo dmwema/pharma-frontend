@@ -32,8 +32,7 @@ export const addProf = (store, prof) => {
   Professor.add(prof)
     .then(function (response) {
       if (response.data.success) {
-        store.commit("ADD_PROF", prof);
-        store.commit("SET_PROFS", response.data.profs);
+        store.dispatch("getProfs");
         Toast.fire({
           icon: "success",
           title: response.data.message,

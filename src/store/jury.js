@@ -16,6 +16,7 @@ export default {
     deliberationCotes: [],
     sessions: [],
     cotesSent: [],
+    results: [],
   },
 
   mutations: {
@@ -23,6 +24,42 @@ export default {
       state.deliberations = [];
       datas.forEach((element) => {
         state.deliberations.push(element);
+      });
+    },
+
+    SET_RESULTS(state, data) {
+      let i = 0;
+      state.results = [];
+      data.forEach((element) => {
+        let decision;
+        if (element.delib.decisions == 1) {
+          decision = "D";
+        } else if (element.delib.decisions == 2) {
+          decision = "S";
+        } else if (element.delib.decisions == 3) {
+          decision = "A";
+        } else if (element.delib.decisions == 4) {
+          decision = "NAF";
+        }
+        console.log(element);
+        state.results.push({
+          key: ++i,
+          id: element.student.id,
+          fullname:
+            element.student.lastname +
+            " " +
+            element.student.middlename +
+            " " +
+            element.student.firstname +
+            " (" +
+            element.student.gender +
+            ")",
+          legers: element.delib.legers,
+          graves: element.delib.graves,
+          nulls: element.delib.nulls,
+          pourc: element.delib.pourc,
+          dec: decision,
+        });
       });
     },
 
@@ -104,12 +141,22 @@ export default {
     getCotesSent(state) {
       return state.cotesSent;
     },
+
+    results(state) {
+      return state.results;
+    },
   },
 
   actions: {
     getDeliberations(store, promotion_id) {
       Deliberation.all(promotion_id).then((response) => {
         store.commit("SET_DELIBERATIONS", response.data);
+      });
+    },
+
+    getResult(store, deliberation_id) {
+      Deliberation.result(deliberation_id).then((response) => {
+        store.commit("SET_RESULTS", response.data);
       });
     },
 
@@ -246,6 +293,7 @@ export default {
     sendCotes(store, data) {
       Session.sendCotes(data)
         .then((response) => {
+          console.log(response);
           if (response.data.success) {
             store.commit("COTES_SENT", data);
             store.dispatch("profTests");

@@ -198,7 +198,7 @@
 			</a-form>
         </a-modal>	
         
-        <a-modal v-model="visible3">
+        <a-modal v-model="visible3" centered>
 			<h5>
 			<small>lien</small> : <a :href="link">{{ link }}</a><br>
 			<small>Code secret</small> : {{ secret }}
@@ -369,15 +369,16 @@
 								)
 							} else {
 								Api.post('/generate', {
-									user_id: this.selectedProf.id,
+									user_id: this.selectedProf.user_id,
 								})
 								.then(response => {
 									if (response.data.success) {
 										this.$swal.fire(
 											'Good job!',
-											'You clicked the button!',
+											'Accès login générés avec ssucès',
 											'success'
-										)		
+										)	
+    									this.$store.dispatch('getProfs')	
 									} else {
 										this.$swal.fire({
 											icon: 'error',
@@ -545,6 +546,7 @@
 
 		watch: {
 			data(value) {
+				console.log(value)
 				if (value !== undefined) {
 					value.forEach(element => {
 						this.localDatas[element.id] = element.has_logins

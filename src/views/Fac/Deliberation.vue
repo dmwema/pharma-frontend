@@ -462,6 +462,7 @@
 				this.form.validateFields((err, values) => {
 					this.visible = false;
 					if ( !err ) {
+						console.log(values)
 						this.addProfStore(values)
 					}
 				});

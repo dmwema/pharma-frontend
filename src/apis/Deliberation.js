@@ -30,6 +30,12 @@ export default {
     });
   },
 
+  result(deliberation_id) {
+    return Api.get("delib-result/" + deliberation_id, {
+      deliberation_id: deliberation_id,
+    });
+  },
+
   getCotes(data) {
     return data;
   },
